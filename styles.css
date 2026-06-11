@@ -248,6 +248,12 @@ button {
   box-shadow: 0 14px 32px rgba(231, 33, 26, 0.32);
 }
 
+.button.apple {
+  color: #fff;
+  background: #151515;
+  box-shadow: 0 14px 32px rgba(21, 21, 21, 0.22);
+}
+
 .button.secondary {
   color: #fff;
   border-color: rgba(255, 255, 255, 0.64);
