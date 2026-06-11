@@ -303,7 +303,7 @@ button {
 }
 
 .section-heading h2,
-.contact-content h2,
+.request-content h2,
 .note-panel h2 {
   margin: 0;
   font-size: clamp(34px, 5.8vw, 72px);
@@ -580,7 +580,11 @@ button {
   line-height: 1.35;
 }
 
-.contact-section {
+.request-section {
+  display: grid;
+  grid-template-columns: minmax(0, 0.7fr) minmax(420px, 0.8fr);
+  gap: 38px;
+  align-items: start;
   padding: 88px max(17px, calc((100% - 1120px) / 2));
   color: #fff;
   background:
@@ -588,14 +592,106 @@ button {
     url("./assets/hero-studio.png") center / cover fixed;
 }
 
-.contact-content {
-  max-width: 760px;
+.request-content {
+  max-width: 560px;
+  position: sticky;
+  top: 120px;
 }
 
-.contact-content p {
+.request-content p {
   max-width: 640px;
   margin-top: 18px;
   color: rgba(255, 255, 255, 0.84);
+}
+
+.request-card {
+  padding: 26px;
+  border-radius: 8px;
+  color: var(--ink);
+  background: rgba(255, 253, 247, 0.96);
+  box-shadow: var(--shadow);
+}
+
+.request-frame {
+  display: none;
+}
+
+.request-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.request-field {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.request-field.full {
+  grid-column: 1 / -1;
+}
+
+.request-field span {
+  font-size: 13px;
+  font-weight: 1000;
+}
+
+.request-field input,
+.request-field select,
+.request-field textarea {
+  width: 100%;
+  min-height: 50px;
+  padding: 12px 14px;
+  color: var(--ink);
+  font: inherit;
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.55;
+  background: #fff;
+  border: 2px solid rgba(21, 21, 21, 0.16);
+  border-radius: 8px;
+  outline: none;
+  transition: border-color 160ms ease, box-shadow 160ms ease;
+}
+
+.request-field textarea {
+  min-height: 160px;
+  resize: vertical;
+}
+
+.request-field input:focus,
+.request-field select:focus,
+.request-field textarea:focus {
+  border-color: var(--blue);
+  box-shadow: 0 0 0 4px rgba(22, 103, 217, 0.14);
+}
+
+.request-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 18px;
+}
+
+.request-actions .button {
+  cursor: pointer;
+}
+
+.request-copy {
+  color: var(--ink);
+  border-color: rgba(21, 21, 21, 0.22);
+  background: #fff;
+}
+
+.request-note {
+  min-height: 24px;
+  margin: 14px 0 0;
+  color: var(--ink-soft);
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.7;
 }
 
 .site-footer {
@@ -677,8 +773,17 @@ button {
     transform: none;
   }
 
-  .note-panel {
+  .note-panel,
+  .request-section {
     display: grid;
+  }
+
+  .request-section {
+    grid-template-columns: 1fr;
+  }
+
+  .request-content {
+    position: static;
   }
 }
 
@@ -731,7 +836,7 @@ button {
   }
 
   .section-heading h2,
-  .contact-content h2,
+  .request-content h2,
   .note-panel h2 {
     font-size: clamp(32px, 11vw, 48px);
   }
@@ -754,6 +859,24 @@ button {
     padding: 28px;
   }
 
+  .request-section {
+    padding-block: 70px;
+    background-attachment: scroll;
+  }
+
+  .request-card {
+    padding: 20px;
+  }
+
+  .request-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .request-actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
   .gift-list a {
     align-items: flex-start;
   }
@@ -762,7 +885,4 @@ button {
     font-size: 17px;
   }
 
-  .contact-section {
-    background-attachment: scroll;
-  }
 }

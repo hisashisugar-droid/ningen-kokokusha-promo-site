@@ -35,7 +35,7 @@
         <a href="#members">Members</a>
         <a href="#listen">Listen</a>
         <a href="#secret">Secret</a>
-        <a href="#contact">Contact</a>
+        <a href="#request">Request</a>
       </nav>
     </header>
 
@@ -56,7 +56,7 @@
           </p>
           <div class="hero-actions" aria-label="主要リンク">
             <a class="button primary" href="https://open.spotify.com/show/0hQ9393s1c4rJ1iu0iF4d3?si=2be7f99b73c1443c" target="_blank" rel="noopener">Spotifyで聴く</a>
-            <a class="button secondary" href="https://twitter.com/_ningenradio" target="_blank" rel="noopener">Xへ相談する</a>
+            <a class="button secondary" href="#request">リクエストを送る</a>
           </div>
         </div>
         <div class="hero-strip" aria-label="配信スケジュール">
@@ -215,17 +215,64 @@
         </div>
       </section>
 
-      <section id="contact" class="contact-section" aria-labelledby="contact-title">
-        <div class="contact-content">
-          <p class="eyebrow">Contact</p>
-          <h2 id="contact-title">ご意見、取り上げてほしいテーマをお待ちしています。</h2>
+      <section id="request" class="request-section" aria-labelledby="request-title">
+        <div class="request-content">
+          <p class="eyebrow">Request</p>
+          <h2 id="request-title">番組へのリクエスト</h2>
           <p>
-            質問、疑問、扱ってほしい業界やトレンドの要望は、Xまたはフォームからどうぞ。
+            取り上げてほしいテーマ、広告・マーケティングのお悩み、質問をお送りください。
           </p>
-          <div class="hero-actions">
-            <a class="button primary" href="https://twitter.com/_ningenradio" target="_blank" rel="noopener">Xで送る</a>
-            <a class="button secondary light" href="https://docs.google.com/forms/d/e/1FAIpQLSeH4WOG6_KTxEPARHxJrAYVzjn9EBFYpfeE0zbTqgn6TQlrww/viewform" target="_blank" rel="noopener">フォームを開く</a>
-          </div>
+        </div>
+
+        <div class="request-card">
+          <iframe
+            id="requestFrame"
+            name="requestFrame"
+            title="リクエスト送信用フレーム"
+            class="request-frame"
+          ></iframe>
+
+          <form id="requestForm" class="request-form" method="POST" target="requestFrame">
+            <input type="hidden" name="fvv" value="1" />
+            <input type="hidden" name="pageHistory" value="0" />
+            <input type="hidden" name="fbzx" value="-7498536633323751196" />
+            <input type="hidden" name="submissionTimestamp" value="-1" />
+
+            <div class="request-grid">
+              <label class="request-field">
+                <span>お名前・ラジオネーム</span>
+                <input id="requestName" name="entry.125613912" type="text" autocomplete="name" placeholder="例：広告勉強中" />
+              </label>
+
+              <label class="request-field">
+                <span>種別</span>
+                <select id="requestCategory">
+                  <option value="若手マーケッターのお悩み相談">若手マーケッターのお悩み相談</option>
+                  <option value="マーケティング教室で扱ってほしいテーマ">マーケティング教室で扱ってほしいテーマ</option>
+                  <option value="広告業界ニュースのリクエスト">広告業界ニュースのリクエスト</option>
+                  <option value="番組への感想・その他">番組への感想・その他</option>
+                </select>
+              </label>
+
+              <label class="request-field full">
+                <span>リクエスト内容</span>
+                <textarea
+                  id="requestMessage"
+                  name="entry.1992023725"
+                  required
+                  maxlength="520"
+                  placeholder="聞いてみたいこと、相談したいこと、取り上げてほしい業界やトレンドなど"
+                ></textarea>
+              </label>
+            </div>
+
+            <div class="request-actions">
+              <button class="button primary" type="submit">送信する</button>
+              <button class="button request-copy" type="button" id="requestCopyButton">内容をコピー</button>
+            </div>
+
+            <p class="request-note" id="requestNote">送信内容はGoogleフォームに保存されます。</p>
+          </form>
         </div>
       </section>
     </main>
