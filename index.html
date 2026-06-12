@@ -109,31 +109,37 @@
         </div>
         <div class="member-grid">
           <button class="member-card" type="button" data-member="hayami" aria-haspopup="dialog">
+            <span class="member-wipe" aria-hidden="true"></span>
             <span class="member-number">01</span>
             <h3>ハヤミ</h3>
             <p>代理店から独立して日々どさ回りをしている、現場感のある語り部。</p>
           </button>
           <button class="member-card" type="button" data-member="nagako" aria-haspopup="dialog">
+            <span class="member-wipe" aria-hidden="true"></span>
             <span class="member-number">02</span>
             <h3>ナガコ</h3>
             <p>MBAホルダーで知的好奇心の塊のような営業。</p>
           </button>
           <button class="member-card" type="button" data-member="setchan" aria-haspopup="dialog">
+            <span class="member-wipe" aria-hidden="true"></span>
             <span class="member-number">03</span>
             <h3>せっちゃん</h3>
             <p>史上最強のマーケティング論客。</p>
           </button>
           <button class="member-card" type="button" data-member="motchan" aria-haspopup="dialog">
+            <span class="member-wipe" aria-hidden="true"></span>
             <span class="member-number">04</span>
             <h3>モッちゃん</h3>
             <p>クイズマスターで唯一のZ世代。</p>
           </button>
           <button class="member-card" type="button" data-member="hisashi" aria-haspopup="dialog">
+            <span class="member-wipe" aria-hidden="true"></span>
             <span class="member-number">05</span>
             <h3>ヒサシ</h3>
             <p>プランニングディレクターでシナリオライター。</p>
           </button>
           <button class="member-card ghost" type="button" data-member="hiroshi" aria-haspopup="dialog">
+            <span class="member-wipe" aria-hidden="true"></span>
             <span class="member-number">06</span>
             <h3>ヒロシ</h3>
             <p>ヒサシの亡霊でヒサシの分身。</p>
@@ -312,6 +318,7 @@
     <dialog id="memberDialog" class="member-dialog" aria-labelledby="memberDialogName">
       <div class="member-dialog-card">
         <button class="member-dialog-close" type="button" aria-label="社員紹介を閉じる">×</button>
+        <span id="memberDialogWipe" class="member-dialog-wipe" aria-hidden="true"></span>
         <p id="memberDialogNumber" class="member-dialog-number">01</p>
         <p id="memberDialogRole" class="member-dialog-role">Role</p>
         <h2 id="memberDialogName">社員名</h2>

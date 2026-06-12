@@ -186,6 +186,7 @@ function openMemberDialog(memberId, trigger) {
   if (!profile || !memberDialog) return;
 
   activeMemberButton = trigger;
+  memberDialog.dataset.currentMember = memberId;
   memberDialogNumber.textContent = profile.number;
   memberDialogRole.textContent = profile.role;
   memberDialogName.textContent = profile.name;

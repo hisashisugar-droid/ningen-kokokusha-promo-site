@@ -490,6 +490,62 @@ button {
   content: "";
 }
 
+.member-card > :not(.member-wipe) {
+  position: relative;
+  z-index: 1;
+}
+
+.member-wipe,
+.member-dialog-wipe {
+  display: block;
+  overflow: hidden;
+  border: 3px solid rgba(255, 255, 255, 0.88);
+  border-radius: 999px;
+  background-image: url("./assets/member-wipes.png");
+  background-repeat: no-repeat;
+  background-size: 300% 200%;
+}
+
+.member-wipe {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  z-index: 2;
+  width: 88px;
+  height: 88px;
+  box-shadow: 0 0 0 3px rgba(21, 21, 21, 0.2), 6px 6px 0 rgba(21, 21, 21, 0.2);
+}
+
+.member-card[data-member="hayami"] .member-wipe,
+.member-dialog[data-current-member="hayami"] .member-dialog-wipe {
+  background-position: 0% 0%;
+}
+
+.member-card[data-member="hisashi"] .member-wipe,
+.member-dialog[data-current-member="hisashi"] .member-dialog-wipe {
+  background-position: 50% 0%;
+}
+
+.member-card[data-member="setchan"] .member-wipe,
+.member-dialog[data-current-member="setchan"] .member-dialog-wipe {
+  background-position: 100% 0%;
+}
+
+.member-card[data-member="nagako"] .member-wipe,
+.member-dialog[data-current-member="nagako"] .member-dialog-wipe {
+  background-position: 0% 100%;
+}
+
+.member-card[data-member="motchan"] .member-wipe,
+.member-dialog[data-current-member="motchan"] .member-dialog-wipe {
+  background-position: 50% 100%;
+}
+
+.member-card[data-member="hiroshi"] .member-wipe,
+.member-dialog[data-current-member="hiroshi"] .member-dialog-wipe {
+  background-position: 100% 100%;
+}
+
 .member-card:nth-child(1) {
   background: linear-gradient(135deg, #e7211a, #ff7a35);
 }
@@ -580,7 +636,8 @@ button {
 
 .member-dialog-card {
   position: relative;
-  padding: 34px;
+  min-height: 292px;
+  padding: 34px 190px 34px 34px;
   overflow: hidden;
   border: 4px solid var(--ink);
   border-radius: 8px;
@@ -619,6 +676,17 @@ button {
   border: 0;
   border-radius: 999px;
   cursor: pointer;
+}
+
+.member-dialog-wipe {
+  position: absolute;
+  top: 78px;
+  right: 34px;
+  z-index: 2;
+  width: 124px;
+  height: 124px;
+  border-color: #fff;
+  box-shadow: 0 0 0 4px var(--ink), 8px 8px 0 var(--yellow);
 }
 
 .member-dialog-number {
@@ -1214,6 +1282,11 @@ button {
     min-height: 180px;
   }
 
+  .member-wipe {
+    width: 78px;
+    height: 78px;
+  }
+
   .schedule-card {
     min-height: auto;
   }
@@ -1231,6 +1304,25 @@ button {
   .episode-card {
     min-height: auto;
     padding: 18px;
+  }
+
+  .member-dialog-card {
+    min-height: auto;
+    padding: 26px;
+  }
+
+  .member-dialog-wipe {
+    position: relative;
+    top: auto;
+    right: auto;
+    width: 112px;
+    height: 112px;
+    margin: 0 0 18px;
+  }
+
+  .member-dialog-close {
+    top: 12px;
+    right: 12px;
   }
 
   .note-panel {
