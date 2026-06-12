@@ -513,7 +513,7 @@ button {
   overflow: hidden;
   border: 6px solid var(--ink);
   border-radius: 8px;
-  background: #fff;
+  background: #245f78;
   box-shadow: 12px 12px 0 var(--red);
 }
 
