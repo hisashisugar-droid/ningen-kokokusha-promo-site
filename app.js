@@ -7,6 +7,7 @@ const requestNote = document.getElementById("requestNote");
 const requestName = document.getElementById("requestName");
 const requestCategory = document.getElementById("requestCategory");
 const requestMessage = document.getElementById("requestMessage");
+const episodeList = document.getElementById("episodeList");
 
 const googleFormConfig = {
   formResponseUrl:
@@ -18,6 +19,86 @@ const googleFormConfig = {
 };
 
 let requestSubmitted = false;
+
+function escapeHtml(value = "") {
+  return String(value).replace(/[&<>"']/g, (character) => {
+    const entities = {
+      "&": "&amp;",
+      "<": "&lt;",
+      ">": "&gt;",
+      '"': "&quot;",
+      "'": "&#39;",
+    };
+
+    return entities[character];
+  });
+}
+
+function formatEpisodeDate(dateString) {
+  const date = new Date(dateString);
+
+  if (Number.isNaN(date.getTime())) {
+    return "";
+  }
+
+  return new Intl.DateTimeFormat("ja-JP", {
+    month: "short",
+    day: "numeric",
+  }).format(date);
+}
+
+function truncateText(value = "", maxLength = 120) {
+  if (value.length <= maxLength) return value;
+
+  return `${value.slice(0, maxLength).trim()}...`;
+}
+
+function renderEpisodes(episodes) {
+  if (!episodeList) return;
+
+  if (!episodes.length) {
+    episodeList.innerHTML =
+      '<p class="episode-loading">最新エピソードを読み込めませんでした。Spotifyからご確認ください。</p>';
+    return;
+  }
+
+  episodeList.innerHTML = episodes
+    .map((episode) => {
+      const title = escapeHtml(episode.title || "タイトル未設定");
+      const date = formatEpisodeDate(episode.pubDate);
+      const duration = escapeHtml(episode.duration || "");
+      const meta = [date, duration].filter(Boolean).join(" / ");
+      const description = escapeHtml(truncateText(episode.description || "番組ページで詳細をご確認ください。"));
+      const link = episode.link || "https://open.spotify.com/show/0hQ9393s1c4rJ1iu0iF4d3";
+
+      return `
+        <article class="episode-card">
+          <p class="episode-meta">${escapeHtml(meta)}</p>
+          <h4>${title}</h4>
+          <p>${description}</p>
+          <a href="${escapeHtml(link)}" target="_blank" rel="noopener">エピソードを開く</a>
+        </article>
+      `;
+    })
+    .join("");
+}
+
+async function loadEpisodes() {
+  if (!episodeList) return;
+
+  try {
+    const response = await fetch("/api/episodes");
+
+    if (!response.ok) {
+      throw new Error("Episode request failed.");
+    }
+
+    const data = await response.json();
+    renderEpisodes(Array.isArray(data.episodes) ? data.episodes : []);
+  } catch (error) {
+    renderEpisodes([]);
+  }
+}
 
 if (navToggle) {
   navToggle.addEventListener("click", () => {
@@ -103,3 +184,5 @@ if (requestCopyButton) {
     }
   });
 }
+
+loadEpisodes();

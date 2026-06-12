@@ -568,6 +568,103 @@ button {
   line-height: 1.25;
 }
 
+.latest-episodes {
+  margin-top: 34px;
+}
+
+.latest-episodes-heading {
+  display: flex;
+  gap: 14px;
+  align-items: end;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.latest-episodes-heading .eyebrow {
+  margin: 0;
+}
+
+.latest-episodes-heading h3 {
+  margin: 0;
+  font-size: clamp(24px, 4vw, 38px);
+  font-weight: 1000;
+  line-height: 1.08;
+}
+
+.episode-list {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.episode-card,
+.episode-loading {
+  border: 3px solid var(--ink);
+  border-radius: 8px;
+  background: #fff;
+}
+
+.episode-card {
+  display: grid;
+  min-height: 260px;
+  align-content: start;
+  padding: 20px;
+  box-shadow: 7px 7px 0 var(--blue);
+}
+
+.episode-card:nth-child(2) {
+  box-shadow: 7px 7px 0 var(--yellow);
+}
+
+.episode-card:nth-child(3) {
+  box-shadow: 7px 7px 0 var(--green);
+}
+
+.episode-meta {
+  min-height: 20px;
+  margin: 0 0 12px;
+  color: var(--red);
+  font-size: 12px;
+  font-weight: 1000;
+  letter-spacing: 0.04em;
+}
+
+.episode-card h4 {
+  margin: 0;
+  font-size: 21px;
+  font-weight: 1000;
+  line-height: 1.35;
+}
+
+.episode-card p:not(.episode-meta) {
+  margin: 12px 0 0;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+.episode-card a {
+  align-self: end;
+  justify-self: start;
+  margin-top: 18px;
+  padding: 9px 12px;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 900;
+  text-decoration: none;
+  background: var(--ink);
+  border-radius: 999px;
+}
+
+.episode-loading {
+  grid-column: 1 / -1;
+  margin: 0;
+  padding: 18px;
+  color: var(--muted);
+  font-weight: 800;
+  line-height: 1.7;
+}
+
 .note-section {
   padding-bottom: 46px;
 }
@@ -856,7 +953,8 @@ button {
 
   .schedule-strip,
   .intro-section,
-  .listen-layout {
+  .listen-layout,
+  .episode-list {
     grid-template-columns: 1fr;
   }
 
@@ -952,6 +1050,16 @@ button {
   .player-frame {
     border-width: 4px;
     box-shadow: 7px 7px 0 var(--red);
+  }
+
+  .latest-episodes-heading {
+    display: grid;
+    gap: 8px;
+  }
+
+  .episode-card {
+    min-height: auto;
+    padding: 18px;
   }
 
   .note-panel {
