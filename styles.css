@@ -549,6 +549,10 @@ button {
   box-shadow: 6px 6px 0 var(--green);
 }
 
+.listen-links a:nth-child(5) {
+  box-shadow: 6px 6px 0 var(--red);
+}
+
 .listen-links span,
 .secret-label {
   color: var(--red);
