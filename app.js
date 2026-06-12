@@ -8,6 +8,13 @@ const requestName = document.getElementById("requestName");
 const requestCategory = document.getElementById("requestCategory");
 const requestMessage = document.getElementById("requestMessage");
 const episodeList = document.getElementById("episodeList");
+const memberButtons = document.querySelectorAll("[data-member]");
+const memberDialog = document.getElementById("memberDialog");
+const memberDialogClose = document.querySelector(".member-dialog-close");
+const memberDialogNumber = document.getElementById("memberDialogNumber");
+const memberDialogRole = document.getElementById("memberDialogRole");
+const memberDialogName = document.getElementById("memberDialogName");
+const memberDialogBody = document.getElementById("memberDialogBody");
 
 const googleFormConfig = {
   formResponseUrl:
@@ -19,6 +26,52 @@ const googleFormConfig = {
 };
 
 let requestSubmitted = false;
+let activeMemberButton = null;
+
+const memberProfiles = {
+  hayami: {
+    number: "01",
+    name: "ハヤミ",
+    role: "現場感のある語り部",
+    body:
+      "代理店から独立して日々どさ回りをしている、ニンゲン広告社の現場派。机上の理論だけでは拾いきれない違和感や肌ざわりを、マーケティングの問いに変えて持ち帰ります。",
+  },
+  nagako: {
+    number: "02",
+    name: "ナガコ",
+    role: "知的好奇心の営業",
+    body:
+      "MBAホルダーで知的好奇心の塊のような営業。理論と実務、まじめさと脱線を行き来しながら、散らかった話題をぐっと立体的にしてくれる存在です。",
+  },
+  setchan: {
+    number: "03",
+    name: "せっちゃん",
+    role: "マーケティング論客",
+    body:
+      "史上最強のマーケティング論客。空気に流されず、論点をばしっと置き直す係。番組にほどよい緊張感と、考える楽しさを持ち込んでくれます。",
+  },
+  motchan: {
+    number: "04",
+    name: "モッちゃん",
+    role: "Z世代のクイズマスター",
+    body:
+      "クイズマスターで唯一のZ世代。若い感覚と切れ味のある問いで、いつもの議論に新しい入口を作ります。知らないことを面白がる力が強い社員です。",
+  },
+  hisashi: {
+    number: "05",
+    name: "ヒサシ",
+    role: "企画と言葉の設計者",
+    body:
+      "プランニングディレクターでシナリオライター。広告、物語、社会の空気をつなぎながら、番組全体の問いを設計します。たまに話が遠くへ行くのも味です。",
+  },
+  hiroshi: {
+    number: "06",
+    name: "ヒロシ",
+    role: "ヒサシの亡霊",
+    body:
+      "ヒサシの亡霊でヒサシの分身。存在しているようでしていない、していないようでしている社員。Web限定コンテンツの気配をそっと濃くしています。",
+  },
+};
 
 function escapeHtml(value = "") {
   return String(value).replace(/[&<>"']/g, (character) => {
@@ -113,6 +166,59 @@ navLinks.forEach((link) => {
     navToggle?.setAttribute("aria-expanded", "false");
   });
 });
+
+function closeMemberDialog() {
+  if (!memberDialog) return;
+
+  if (memberDialog.open && typeof memberDialog.close === "function") {
+    memberDialog.close();
+  } else {
+    memberDialog.removeAttribute("open");
+  }
+
+  activeMemberButton?.focus();
+  activeMemberButton = null;
+}
+
+function openMemberDialog(memberId, trigger) {
+  const profile = memberProfiles[memberId];
+
+  if (!profile || !memberDialog) return;
+
+  activeMemberButton = trigger;
+  memberDialogNumber.textContent = profile.number;
+  memberDialogRole.textContent = profile.role;
+  memberDialogName.textContent = profile.name;
+  memberDialogBody.textContent = profile.body;
+
+  if (typeof memberDialog.showModal === "function") {
+    memberDialog.showModal();
+  } else {
+    memberDialog.setAttribute("open", "");
+  }
+}
+
+memberButtons.forEach((button) => {
+  button.addEventListener("click", () => {
+    openMemberDialog(button.dataset.member, button);
+  });
+});
+
+if (memberDialog) {
+  memberDialog.addEventListener("click", (event) => {
+    if (event.target === memberDialog) {
+      closeMemberDialog();
+    }
+  });
+
+  memberDialog.addEventListener("cancel", () => {
+    activeMemberButton = null;
+  });
+}
+
+if (memberDialogClose) {
+  memberDialogClose.addEventListener("click", closeMemberDialog);
+}
 
 function buildRequestText() {
   const name = requestName.value.trim() || "匿名";

@@ -452,6 +452,7 @@ button {
 }
 
 .member-card {
+  appearance: none;
   position: relative;
   min-height: 214px;
   padding: 24px;
@@ -459,8 +460,23 @@ button {
   border: 3px solid var(--ink);
   border-radius: 8px;
   color: #fff;
+  font: inherit;
+  text-align: left;
   background: var(--red);
   box-shadow: 8px 8px 0 var(--ink);
+  cursor: pointer;
+  transition:
+    filter 160ms ease,
+    box-shadow 160ms ease;
+}
+
+.member-card:hover {
+  filter: saturate(1.12) contrast(1.02);
+}
+
+.member-card:focus-visible {
+  outline: 4px solid var(--yellow);
+  outline-offset: 4px;
 }
 
 .member-card::after {
@@ -548,6 +564,101 @@ button {
 
 .member-card.ghost p {
   color: rgba(255, 255, 255, 0.82);
+}
+
+.member-dialog {
+  width: min(620px, calc(100% - 34px));
+  padding: 0;
+  color: var(--ink);
+  border: 0;
+  background: transparent;
+}
+
+.member-dialog::backdrop {
+  background: rgba(21, 21, 21, 0.58);
+}
+
+.member-dialog-card {
+  position: relative;
+  padding: 34px;
+  overflow: hidden;
+  border: 4px solid var(--ink);
+  border-radius: 8px;
+  background:
+    linear-gradient(90deg, rgba(21, 21, 21, 0.05) 1px, transparent 1px),
+    linear-gradient(180deg, #fffdf7, #fff2dc);
+  background-size: 30px 30px, auto;
+  box-shadow: 10px 10px 0 var(--red);
+}
+
+.member-dialog-card::after {
+  position: absolute;
+  right: -48px;
+  bottom: -62px;
+  width: 170px;
+  height: 170px;
+  border: 22px solid rgba(231, 33, 26, 0.12);
+  border-radius: 999px;
+  content: "";
+}
+
+.member-dialog-close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  z-index: 2;
+  display: grid;
+  width: 42px;
+  height: 42px;
+  place-items: center;
+  color: #fff;
+  font-size: 24px;
+  font-weight: 1000;
+  line-height: 1;
+  background: var(--ink);
+  border: 0;
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.member-dialog-number {
+  display: inline-flex;
+  margin: 0 0 16px;
+  padding: 8px 12px;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 1000;
+  line-height: 1;
+  background: var(--red);
+  border-radius: 999px;
+}
+
+.member-dialog-role {
+  margin: 0 0 8px;
+  color: var(--blue);
+  font-size: 12px;
+  font-weight: 1000;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.member-dialog h2 {
+  position: relative;
+  z-index: 1;
+  margin: 0 0 14px;
+  font-size: clamp(34px, 7vw, 58px);
+  font-weight: 1000;
+  line-height: 1.05;
+}
+
+.member-dialog-body {
+  position: relative;
+  z-index: 1;
+  margin: 0;
+  color: var(--ink-soft);
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1.95;
 }
 
 .listen-section {
