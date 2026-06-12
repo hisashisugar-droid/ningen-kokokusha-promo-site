@@ -276,40 +276,6 @@ button {
   background: var(--ink);
 }
 
-.schedule-strip {
-  position: relative;
-  z-index: 2;
-  display: grid;
-  width: 100%;
-  grid-column: 1;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  overflow: hidden;
-  margin: 0;
-  border-radius: 18px;
-  background: rgba(255, 253, 247, 0.94);
-  box-shadow: var(--shadow);
-}
-
-.schedule-strip span {
-  padding: 20px 18px;
-  color: var(--ink);
-  font-size: 14px;
-  font-weight: 1000;
-  line-height: 1.45;
-}
-
-.schedule-strip span:nth-child(1) {
-  border-top: 7px solid var(--red);
-}
-
-.schedule-strip span:nth-child(2) {
-  border-top: 7px solid var(--blue);
-}
-
-.schedule-strip span:nth-child(3) {
-  border-top: 7px solid var(--yellow);
-}
-
 .section {
   width: min(1120px, calc(100% - 34px));
   margin: 0 auto;
@@ -382,6 +348,97 @@ button {
   font-size: 17px;
   font-weight: 700;
   line-height: 2;
+}
+
+.schedule-calendar {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+  margin-top: 28px;
+}
+
+.schedule-card {
+  position: relative;
+  min-height: 178px;
+  padding: 54px 16px 18px;
+  overflow: hidden;
+  border: 3px solid var(--ink);
+  border-radius: 8px;
+  background: #fffdf7;
+  box-shadow: 6px 6px 0 var(--red);
+}
+
+.schedule-card::before {
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  height: 34px;
+  content: "";
+  background:
+    radial-gradient(circle at 24px 17px, #fff 0 5px, transparent 6px),
+    radial-gradient(circle at calc(100% - 24px) 17px, #fff 0 5px, transparent 6px),
+    var(--red);
+}
+
+.schedule-card::after {
+  position: absolute;
+  top: 27px;
+  right: 16px;
+  left: 16px;
+  height: 2px;
+  content: "";
+  background: rgba(21, 21, 21, 0.12);
+}
+
+.schedule-card:nth-child(2) {
+  box-shadow: 6px 6px 0 var(--blue);
+}
+
+.schedule-card:nth-child(2)::before {
+  background:
+    radial-gradient(circle at 24px 17px, #fff 0 5px, transparent 6px),
+    radial-gradient(circle at calc(100% - 24px) 17px, #fff 0 5px, transparent 6px),
+    var(--blue);
+}
+
+.schedule-card:nth-child(3) {
+  box-shadow: 6px 6px 0 var(--yellow);
+}
+
+.schedule-card:nth-child(3)::before {
+  background:
+    radial-gradient(circle at 24px 17px, #fff 0 5px, transparent 6px),
+    radial-gradient(circle at calc(100% - 24px) 17px, #fff 0 5px, transparent 6px),
+    var(--yellow);
+}
+
+.schedule-card .schedule-day {
+  display: inline-flex;
+  margin: 0 0 10px;
+  padding: 6px 10px;
+  color: #fff;
+  font-size: 18px;
+  font-weight: 1000;
+  line-height: 1;
+  background: var(--ink);
+  border-radius: 999px;
+}
+
+.schedule-card .schedule-time {
+  margin: 0 0 8px;
+  color: var(--red);
+  font-size: 13px;
+  font-weight: 1000;
+  letter-spacing: 0.04em;
+}
+
+.schedule-card h3 {
+  margin: 0;
+  color: var(--ink);
+  font-size: 17px;
+  font-weight: 1000;
+  line-height: 1.45;
 }
 
 .members-section {
@@ -951,15 +1008,14 @@ button {
     padding: 22px;
   }
 
-  .schedule-strip,
   .intro-section,
+  .schedule-calendar,
   .listen-layout,
   .episode-list {
     grid-template-columns: 1fr;
   }
 
   .about-art,
-  .schedule-strip,
   .intro-copy {
     grid-column: auto;
   }
@@ -1045,6 +1101,10 @@ button {
 
   .member-card {
     min-height: 180px;
+  }
+
+  .schedule-card {
+    min-height: auto;
   }
 
   .player-frame {
