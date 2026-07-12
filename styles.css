@@ -937,7 +937,9 @@ button {
 }
 
 .secret-card {
-  min-height: 300px;
+  display: flex;
+  min-height: 390px;
+  flex-direction: column;
   padding: 28px;
   border: 3px solid var(--ink);
   border-radius: 8px;
@@ -950,31 +952,36 @@ button {
   box-shadow: 10px 10px 0 var(--red);
 }
 
-.secret-card.secret-feature {
-  display: grid;
-  grid-column: 1 / -1;
-  grid-template-columns: minmax(220px, 0.48fr) minmax(0, 1fr);
-  gap: 24px;
-  align-items: center;
+.secret-card.kiku {
   background: #ffde9c;
   box-shadow: 10px 10px 0 var(--blue);
 }
 
-.secret-card.secret-feature img {
-  width: 100%;
+.secret-card.coming-soon {
+  background: #f7f4ee;
+  box-shadow: 10px 10px 0 var(--yellow);
+}
+
+.secret-thumb {
+  width: 74px;
   aspect-ratio: 1;
   object-fit: cover;
+  margin-bottom: 14px;
   border: 3px solid var(--ink);
   border-radius: 8px;
 }
 
-.secret-card .secret-label {
-  margin-bottom: 46px;
-  color: var(--ink);
+.secret-card.kiku h3 {
+  font-size: 22px;
 }
 
-.secret-card.secret-feature .secret-label {
-  margin-bottom: 18px;
+.secret-card.kiku p:not(.secret-label) {
+  margin-bottom: 24px;
+}
+
+.secret-card .secret-label {
+  color: var(--ink);
+  margin-bottom: 28px;
 }
 
 .secret-card p:not(.secret-label) {
@@ -982,6 +989,7 @@ button {
 }
 
 .secret-card a,
+.secret-card span,
 .gift-list a {
   display: inline-flex;
   align-items: center;
@@ -992,9 +1000,17 @@ button {
   background: var(--ink);
 }
 
-.secret-card a {
+.secret-card a,
+.secret-card span {
+  width: fit-content;
   min-height: 42px;
+  margin-top: auto;
   padding: 10px 16px;
+}
+
+.secret-card span {
+  color: var(--ink);
+  background: rgba(255, 255, 255, 0.7);
 }
 
 .gifts-section {
@@ -1299,14 +1315,6 @@ button {
   .member-grid,
   .secret-grid {
     grid-template-columns: 1fr;
-  }
-
-  .secret-card.secret-feature {
-    grid-template-columns: 1fr;
-  }
-
-  .secret-card.secret-feature img {
-    max-width: 360px;
   }
 
   .member-card {
