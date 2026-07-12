@@ -950,9 +950,31 @@ button {
   box-shadow: 10px 10px 0 var(--red);
 }
 
+.secret-card.secret-feature {
+  display: grid;
+  grid-column: 1 / -1;
+  grid-template-columns: minmax(220px, 0.48fr) minmax(0, 1fr);
+  gap: 24px;
+  align-items: center;
+  background: #ffde9c;
+  box-shadow: 10px 10px 0 var(--blue);
+}
+
+.secret-card.secret-feature img {
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
+  border: 3px solid var(--ink);
+  border-radius: 8px;
+}
+
 .secret-card .secret-label {
   margin-bottom: 46px;
   color: var(--ink);
+}
+
+.secret-card.secret-feature .secret-label {
+  margin-bottom: 18px;
 }
 
 .secret-card p:not(.secret-label) {
@@ -1277,6 +1299,14 @@ button {
   .member-grid,
   .secret-grid {
     grid-template-columns: 1fr;
+  }
+
+  .secret-card.secret-feature {
+    grid-template-columns: 1fr;
+  }
+
+  .secret-card.secret-feature img {
+    max-width: 360px;
   }
 
   .member-card {
