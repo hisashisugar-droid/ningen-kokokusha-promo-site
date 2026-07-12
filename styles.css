@@ -932,17 +932,17 @@ button {
 
 .secret-grid {
   display: grid;
-  grid-auto-rows: 1fr;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 14px;
+  grid-auto-rows: 178px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
 }
 
 .secret-card {
   display: flex;
-  min-height: 270px;
+  position: relative;
   height: 100%;
   flex-direction: column;
-  padding: 20px;
+  padding: 16px;
   border: 3px solid var(--ink);
   border-radius: 8px;
   background: var(--yellow);
@@ -965,37 +965,47 @@ button {
 }
 
 .secret-thumb {
-  width: 56px;
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 46px;
   aspect-ratio: 1;
   object-fit: cover;
-  margin-bottom: 12px;
   border: 3px solid var(--ink);
   border-radius: 8px;
 }
 
 .secret-card h3 {
-  margin-bottom: 10px;
-  font-size: 20px;
+  margin-bottom: 8px;
+  font-size: 19px;
   line-height: 1.25;
 }
 
 .secret-card.kiku h3 {
-  font-size: 18px;
+  font-size: 19px;
 }
 
 .secret-card.kiku p:not(.secret-label) {
-  margin-bottom: 18px;
+  margin-bottom: 14px;
 }
 
 .secret-card .secret-label {
   color: var(--ink);
-  margin-bottom: 16px;
+  margin-bottom: 10px;
+}
+
+.secret-card.kiku .secret-label {
+  padding-right: 60px;
 }
 
 .secret-card p:not(.secret-label) {
-  margin-bottom: 22px;
+  display: -webkit-box;
+  overflow: hidden;
+  margin-bottom: 14px;
   font-size: 13px;
-  line-height: 1.7;
+  line-height: 1.55;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
 }
 
 .secret-card a,
@@ -1013,10 +1023,10 @@ button {
 .secret-card a,
 .secret-card span {
   width: fit-content;
-  min-height: 38px;
+  min-height: 34px;
   margin-top: auto;
-  padding: 9px 13px;
-  font-size: 13px;
+  padding: 7px 12px;
+  font-size: 12px;
 }
 
 .secret-card span {
