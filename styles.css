@@ -932,60 +932,70 @@ button {
 
 .secret-grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 18px;
+  grid-auto-rows: 1fr;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
 }
 
 .secret-card {
   display: flex;
-  min-height: 390px;
+  min-height: 270px;
+  height: 100%;
   flex-direction: column;
-  padding: 28px;
+  padding: 20px;
   border: 3px solid var(--ink);
   border-radius: 8px;
   background: var(--yellow);
-  box-shadow: 10px 10px 0 var(--ink);
+  box-shadow: 7px 7px 0 var(--ink);
 }
 
 .secret-card.accent {
   background: #b9dcff;
-  box-shadow: 10px 10px 0 var(--red);
+  box-shadow: 7px 7px 0 var(--red);
 }
 
 .secret-card.kiku {
   background: #ffde9c;
-  box-shadow: 10px 10px 0 var(--blue);
+  box-shadow: 7px 7px 0 var(--blue);
 }
 
 .secret-card.coming-soon {
   background: #f7f4ee;
-  box-shadow: 10px 10px 0 var(--yellow);
+  box-shadow: 7px 7px 0 var(--yellow);
 }
 
 .secret-thumb {
-  width: 74px;
+  width: 56px;
   aspect-ratio: 1;
   object-fit: cover;
-  margin-bottom: 14px;
+  margin-bottom: 12px;
   border: 3px solid var(--ink);
   border-radius: 8px;
 }
 
+.secret-card h3 {
+  margin-bottom: 10px;
+  font-size: 20px;
+  line-height: 1.25;
+}
+
 .secret-card.kiku h3 {
-  font-size: 22px;
+  font-size: 18px;
 }
 
 .secret-card.kiku p:not(.secret-label) {
-  margin-bottom: 24px;
+  margin-bottom: 18px;
 }
 
 .secret-card .secret-label {
   color: var(--ink);
-  margin-bottom: 28px;
+  margin-bottom: 16px;
 }
 
 .secret-card p:not(.secret-label) {
-  margin-bottom: 32px;
+  margin-bottom: 22px;
+  font-size: 13px;
+  line-height: 1.7;
 }
 
 .secret-card a,
@@ -1003,9 +1013,10 @@ button {
 .secret-card a,
 .secret-card span {
   width: fit-content;
-  min-height: 42px;
+  min-height: 38px;
   margin-top: auto;
-  padding: 10px 16px;
+  padding: 9px 13px;
+  font-size: 13px;
 }
 
 .secret-card span {
@@ -1244,6 +1255,10 @@ button {
   }
 
   .member-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .secret-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
