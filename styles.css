@@ -993,6 +993,12 @@ button {
   -webkit-line-clamp: 2;
 }
 
+.secret-audio {
+  width: 100%;
+  height: 36px;
+  margin-top: auto;
+}
+
 .secret-card a,
 .secret-card span,
 .gift-list a {
