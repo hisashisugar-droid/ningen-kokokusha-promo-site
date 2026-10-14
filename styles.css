@@ -69,7 +69,7 @@ button { color: inherit; }
 .hero-scene { width: 100%; height: auto; }
 .hero-logo-lockup { position: absolute; top: 2.3%; left: 50%; width: min(45vw, 760px); text-align: center; transform: translateX(-50%); }
 .hero-logo { width: 100%; margin: 0 auto; object-fit: contain; filter: drop-shadow(3px 4px 0 rgba(255, 250, 240, .68)); }
-.hero-podcast-label { position: absolute; top: 4%; left: -2%; z-index: 1; padding: .46em .82em; color: var(--paper-light); font-size: clamp(8px, 1vw, 15px); font-weight: 900; line-height: 1; letter-spacing: .1em; white-space: nowrap; background: var(--ink); clip-path: polygon(3% 8%, 100% 0, 96% 91%, 0 100%); transform: rotate(-5deg); }
+.hero-podcast-label { position: absolute; top: 7%; left: 5%; z-index: 1; padding: .46em .82em; color: var(--paper-light); font-size: clamp(8px, 1vw, 15px); font-weight: 900; line-height: 1; letter-spacing: .1em; white-space: nowrap; background: var(--ink); clip-path: polygon(3% 8%, 100% 0, 96% 91%, 0 100%); transform: rotate(-5deg); }
 .hero-panel { display: grid; width: min(var(--max), calc(100% - 40px)); margin: 0 auto; padding: 30px 0 34px; grid-template-columns: minmax(300px, .85fr) minmax(560px, 1.15fr); gap: 40px; align-items: center; }
 .hero-copy { max-width: 620px; margin: 0; font-size: clamp(15px, 1.55vw, 19px); font-weight: 700; line-height: 1.85; }
 .hero-copy strong { padding: 0 3px; background: linear-gradient(transparent 58%, rgba(237, 189, 56, .72) 58%); }
@@ -120,8 +120,10 @@ button { color: inherit; }
 
 .split-heading { position: relative; z-index: 1; display: flex; align-items: end; justify-content: space-between; gap: 40px; margin-bottom: 50px; }
 .split-heading > p { max-width: 320px; margin: 0 0 8px; color: var(--muted); font-size: 14px; font-weight: 700; line-height: 1.85; }
+.members-section { padding-block: 88px; }
+.members-section .split-heading { margin-bottom: 34px; }
 .member-grid { position: relative; z-index: 1; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 26px; }
-.member-card { position: relative; min-height: 360px; padding: 212px 25px 25px; overflow: hidden; text-align: left; border: var(--border); background: var(--paper-light); box-shadow: 8px 8px 0 var(--ink); clip-path: polygon(1% 2%, 98% 0, 100% 95%, 94% 100%, 3% 98%, 0 35%); cursor: pointer; transition: transform .2s ease, box-shadow .2s ease; }
+.member-card { position: relative; min-height: 330px; padding: 198px 25px 23px; overflow: hidden; text-align: left; border: var(--border); background: var(--paper-light); box-shadow: 8px 8px 0 var(--ink); clip-path: polygon(1% 2%, 98% 0, 100% 95%, 94% 100%, 3% 98%, 0 35%); cursor: pointer; transition: transform .2s ease, box-shadow .2s ease; }
 .member-card:hover { transform: translate(4px, 4px) rotate(-1deg); box-shadow: 4px 4px 0 var(--ink); }
 .member-card:focus-visible { outline: 4px solid var(--blue); outline-offset: 5px; }
 .member-card.red { color: #fff; background: var(--red); }
@@ -133,7 +135,7 @@ button { color: inherit; }
 .member-card h3 { margin: 0 0 7px; font-size: 31px; line-height: 1; }
 .member-card p { max-width: 88%; margin: 0; font-size: 13px; font-weight: 700; line-height: 1.5; opacity: .9; }
 .member-wipe, .member-dialog-wipe { display: block; background-repeat: no-repeat; background-position: center; background-size: contain; }
-.member-wipe { position: absolute; top: 14px; left: 50%; width: 190px; height: 188px; filter: drop-shadow(6px 6px 0 rgba(25,23,20,.28)); transform: translateX(-50%) rotate(-2deg); }
+.member-wipe { position: absolute; top: 4px; left: 50%; width: 232px; height: 196px; filter: drop-shadow(6px 6px 0 rgba(25,23,20,.28)); transform: translateX(-50%) rotate(-2deg); }
 .member-card[data-member="hayami"] .member-wipe, .member-dialog[data-current-member="hayami"] .member-dialog-wipe { background-image: url("./assets/member-hayami-kirie-v2.png"); }
 .member-card[data-member="hisashi"] .member-wipe, .member-dialog[data-current-member="hisashi"] .member-dialog-wipe { background-image: url("./assets/member-hisashi-kirie-v2.png"); }
 .member-card[data-member="setchan"] .member-wipe, .member-dialog[data-current-member="setchan"] .member-dialog-wipe { background-image: url("./assets/member-setchan-kirie-v2.png"); }
@@ -263,7 +265,7 @@ button { color: inherit; }
   .site-nav a { padding: 14px 6px; font-size: 16px; border-bottom: 1px solid rgba(48,42,34,.22); }
   .site-nav .nav-request { margin: 10px 0 0; text-align: center; }
   .hero-logo-lockup { top: 2%; width: 56vw; }
-  .hero-podcast-label { top: 2%; left: -4%; font-size: 7px; }
+  .hero-podcast-label { top: 5%; left: 3%; font-size: 7px; }
   .hero-panel { width: min(100% - 30px, var(--max)); padding: 24px 0 30px; }
   .hero-copy br { display: none; }
   .hero-actions { flex-direction: column; }
@@ -281,7 +283,8 @@ button { color: inherit; }
   .split-heading { display: block; }
   .split-heading > p { margin-top: 22px; }
   .member-grid, .episode-list, .secret-grid { grid-template-columns: 1fr; }
-  .member-card { min-height: 350px; }
+  .members-section { padding-block: 72px; }
+  .member-card { min-height: 320px; }
   .listen-section { padding: 90px 16px; }
   .listen-links { grid-template-columns: 1fr; }
   .listen-links a:last-child { grid-column: auto; }
