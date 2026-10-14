@@ -48,6 +48,34 @@ function parseEpisodes(xml) {
   }));
 }
 
+async function resolveSpotifyEpisodeLink(episode) {
+  const episodeId = episode.link.match(/-([a-z0-9]+)(?:[?#].*)?$/i)?.[1];
+
+  if (!episodeId) return episode;
+
+  try {
+    const pageResponse = await fetch(episode.link, {
+      headers: {
+        "user-agent": "ningen-kokokusha-promo-site/1.0",
+      },
+    });
+
+    if (!pageResponse.ok) return episode;
+
+    const page = (await pageResponse.text())
+      .replace(/\\u002F/g, "/")
+      .replace(/\\u0026/g, "&");
+    const escapedId = episodeId.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const spotifyMatch = page.match(
+      new RegExp(`"episodeId":"${escapedId}"[\\s\\S]{0,6000}?"spotifyUrl":"(https://open\\.spotify\\.com/episode/[A-Za-z0-9]+)"`),
+    );
+
+    return spotifyMatch ? { ...episode, link: spotifyMatch[1] } : episode;
+  } catch (error) {
+    return episode;
+  }
+}
+
 module.exports = async function handler(request, response) {
   try {
     const rssResponse = await fetch(RSS_URL, {
@@ -61,7 +89,7 @@ module.exports = async function handler(request, response) {
     }
 
     const xml = await rssResponse.text();
-    const episodes = parseEpisodes(xml);
+    const episodes = await Promise.all(parseEpisodes(xml).map(resolveSpotifyEpisodeLink));
 
     response.setHeader("Cache-Control", "s-maxage=900, stale-while-revalidate=3600");
     response.status(200).json({ episodes });

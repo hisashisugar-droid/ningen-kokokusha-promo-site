@@ -13,7 +13,6 @@ const episodeList = document.getElementById("episodeList");
 const memberButtons = document.querySelectorAll("[data-member]");
 const memberDialog = document.getElementById("memberDialog");
 const memberDialogClose = document.querySelector(".member-dialog-close");
-const memberDialogNumber = document.getElementById("memberDialogNumber");
 const memberDialogRole = document.getElementById("memberDialogRole");
 const memberDialogName = document.getElementById("memberDialogName");
 const memberDialogBody = document.getElementById("memberDialogBody");
@@ -32,42 +31,36 @@ let activeMemberButton = null;
 
 const memberProfiles = {
   hayami: {
-    number: "01",
     name: "ハヤミ",
     role: "職種：スピリチュアルメディアAE",
     body:
       "得意なこと：世界を旅してXXする\n好きな本：「未来の消費者は何を欲望するのか」\n口癖：ちゃいますやん！",
   },
   nagako: {
-    number: "02",
     name: "ナガコ",
     role: "職業：PM",
     body:
       "得意なこと：傾聴\n好きな本：田坂広志「すべては導かれてる」\n口癖：うーわ！　それでいうと！",
   },
   setchan: {
-    number: "03",
     name: "せっちゃん",
     role: "職業：プランナー",
     body:
       "得意なこと：逆境\n好きな本：熊野宏昭「ストレスに負けない生活」\n口癖：あとはこちらで預かります",
   },
   motchan: {
-    number: "04",
     name: "モッちゃん",
     role: "職業：新米プランナー→新米営業",
     body:
       "得意なこと：瞬発的なリアクション\n好きな本：角田光代「対岸の彼女」\n口癖：それってあれですかね？",
   },
   hisashi: {
-    number: "05",
     name: "ヒサシ",
     role: "職業：プランニングシナリオライター",
     body:
       "得意なこと：人の目を気にしない\n好きな本：岡田林太郎「憶えている」\n口癖：僕はですね　おっしゃる通り",
   },
   hiroshi: {
-    number: "06",
     name: "ヒロシ",
     role: "職業：エージェンティックAI",
     body:
@@ -210,7 +203,6 @@ function openMemberDialog(memberId, trigger) {
 
   activeMemberButton = trigger;
   memberDialog.dataset.currentMember = memberId;
-  memberDialogNumber.textContent = profile.number;
   memberDialogRole.textContent = profile.role;
   memberDialogName.textContent = profile.name;
   memberDialogBody.textContent = profile.body;
