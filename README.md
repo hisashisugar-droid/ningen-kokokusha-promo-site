@@ -7,7 +7,9 @@ LINEスタンプの切り絵世界を軸に再設計した、Vercel向けの公�
 - `index.html`: 1ページ構成のサイト本体
 - `styles.css`: レスポンシブデザイン
 - `app.js`: モバイルナビゲーション
-- `assets/ningen-kokokusha-logo-kirie.png`: 新しい切り絵ロゴ
+- `assets/ningen-kokokusha-wordmark-v3-monochrome.png`: 単色の正式ロゴタイプ
+- `assets/ningen-kokokusha-five-characters-v4-hisashi-reclining.png`: 5人入りの別ロゴマーク
+- `assets/hero-recording-kirie-v4-canonical-faces.png`: 収録中の切り絵トップ画像
 - `assets/01.png`〜`08.png`, `main.png`: 切り絵キャラクター素材
 - `api/episodes.js`: RSSから最新3話を取得するVercel Function
 - `vercel.json`: Vercel用の静的サイト設定
