@@ -1,3 +1,5 @@
+document.documentElement.classList.add("js");
+
 const navToggle = document.querySelector(".nav-toggle");
 const navLinks = document.querySelectorAll(".site-nav a");
 const requestForm = document.getElementById("requestForm");
@@ -157,6 +159,7 @@ if (navToggle) {
   navToggle.addEventListener("click", () => {
     const isOpen = document.body.classList.toggle("nav-open");
     navToggle.setAttribute("aria-expanded", String(isOpen));
+    navToggle.setAttribute("aria-label", isOpen ? "メニューを閉じる" : "メニューを開く");
   });
 }
 
@@ -164,8 +167,28 @@ navLinks.forEach((link) => {
   link.addEventListener("click", () => {
     document.body.classList.remove("nav-open");
     navToggle?.setAttribute("aria-expanded", "false");
+    navToggle?.setAttribute("aria-label", "メニューを開く");
   });
 });
+
+const revealTargets = document.querySelectorAll(".reveal");
+
+if ("IntersectionObserver" in window) {
+  const revealObserver = new IntersectionObserver(
+    (entries, observer) => {
+      entries.forEach((entry) => {
+        if (!entry.isIntersecting) return;
+        entry.target.classList.add("is-visible");
+        observer.unobserve(entry.target);
+      });
+    },
+    { threshold: 0.12 },
+  );
+
+  revealTargets.forEach((target) => revealObserver.observe(target));
+} else {
+  revealTargets.forEach((target) => target.classList.add("is-visible"));
+}
 
 function closeMemberDialog() {
   if (!memberDialog) return;
