@@ -2,6 +2,7 @@
   "name": "ningen-kokokusha-promo-site",
   "private": true,
   "scripts": {
-    "build": "node scripts/build-episodes.mjs"
+    "build": "node scripts/build-episodes.mjs",
+    "check": "node --check app.js && node --check api/episodes.js && node --check scripts/build-episodes.mjs && node --check scripts/validate-jsonld.mjs && node scripts/validate-jsonld.mjs"
   }
 }

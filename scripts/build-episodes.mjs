@@ -8,6 +8,8 @@ const episodesDirectory = path.join(rootDirectory, "episodes");
 const config = JSON.parse(await readFile(path.join(rootDirectory, "site.config.json"), "utf8"));
 const episodeListStart = "<!-- EPISODE_LIST_START -->";
 const episodeListEnd = "<!-- EPISODE_LIST_END -->";
+const seriesJsonLdStart = "<!-- PODCAST_SERIES_JSONLD_START -->";
+const seriesJsonLdEnd = "<!-- PODCAST_SERIES_JSONLD_END -->";
 
 function decodeEntities(value = "") {
   const namedEntities = {
@@ -92,6 +94,29 @@ function formatDuration(duration = "") {
   return [hours ? `${hours}時間` : "", minutes ? `${minutes}分` : "", seconds ? `${seconds}秒` : ""].filter(Boolean).join("");
 }
 
+function formatPublishedDate(dateString) {
+  const date = new Date(dateString);
+
+  if (Number.isNaN(date.getTime())) return "";
+
+  const jstDate = new Date(date.getTime() + 9 * 60 * 60 * 1000);
+  return `${jstDate.toISOString().slice(0, 19)}+09:00`;
+}
+
+function formatIsoDuration(duration = "") {
+  const parts = duration.split(":").map(Number);
+
+  if (parts.some(Number.isNaN)) return "";
+
+  const [hours, minutes, seconds] = parts.length === 3 ? parts : [0, ...parts];
+  const value = [hours ? `${hours}H` : "", minutes ? `${minutes}M` : "", seconds ? `${seconds}S` : ""].filter(Boolean).join("");
+  return `PT${value || "0S"}`;
+}
+
+function jsonLdMarkup(data) {
+  return JSON.stringify(data, null, 2).replace(/</g, "\\u003c");
+}
+
 function parseEpisodes(xml) {
   const itemBlocks = xml.match(/<item[\s\S]*?<\/item>/gi) ?? [];
 
@@ -129,6 +154,20 @@ function episodePage(episode, previousEpisode, nextEpisode) {
   const description = summary(episode.description);
   const publishedDate = new Date(episode.pubDate);
   const dateTime = Number.isNaN(publishedDate.getTime()) ? "" : publishedDate.toISOString();
+  const episodeJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "PodcastEpisode",
+    name: episode.title,
+    description: episode.description,
+    datePublished: formatPublishedDate(episode.pubDate),
+    timeRequired: formatIsoDuration(episode.duration),
+    partOfSeries: {
+      "@type": "PodcastSeries",
+      name: config.siteName,
+      url: `${config.siteUrl}/`,
+    },
+    url: pageUrl,
+  };
   const pagination = [
     previousEpisode
       ? `<a href="./${previousEpisode.slug}.html"><span>← 前の回</span><strong>${escapeHtml(previousEpisode.title)}</strong></a>`
@@ -160,6 +199,9 @@ function episodePage(episode, previousEpisode, nextEpisode) {
     <meta name="twitter:description" content="${escapeHtml(description)}" />
     <meta name="twitter:image" content="${imageUrl}" />
     <link rel="canonical" href="${pageUrl}" />
+    <script type="application/ld+json">
+${jsonLdMarkup(episodeJsonLd).split("\n").map((line) => `      ${line}`).join("\n")}
+    </script>
     <link rel="icon" type="image/png" href="../assets/tab.png" />
     <link rel="stylesheet" href="../styles.css" />
   </head>
@@ -213,6 +255,29 @@ function replaceEpisodeList(indexHtml, episodes) {
   return `${indexHtml.slice(0, startIndex)}${replacement}${indexHtml.slice(endIndex + episodeListEnd.length)}`;
 }
 
+function replacePodcastSeriesJsonLd(indexHtml) {
+  const startIndex = indexHtml.indexOf(seriesJsonLdStart);
+  const endIndex = indexHtml.indexOf(seriesJsonLdEnd);
+
+  if (startIndex === -1 || endIndex === -1 || endIndex < startIndex) {
+    throw new Error("index.html の構造化データ生成マーカーが見つかりません。");
+  }
+
+  const seriesJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "PodcastSeries",
+    name: config.siteName,
+    description: "人文知でマーケティングを学ぶPodcast。人間の可笑しみから、使えるインサイトを掘り起こします。",
+    url: `${config.siteUrl}/`,
+    image: `${config.siteUrl}/assets/og-cover.png`,
+    inLanguage: "ja",
+    webFeed: config.rssUrl,
+  };
+  const indentedJson = jsonLdMarkup(seriesJsonLd).split("\n").map((line) => `      ${line}`).join("\n");
+  const replacement = `${seriesJsonLdStart}\n    <script type="application/ld+json">\n${indentedJson}\n    </script>\n    ${seriesJsonLdEnd}`;
+  return `${indexHtml.slice(0, startIndex)}${replacement}${indexHtml.slice(endIndex + seriesJsonLdEnd.length)}`;
+}
+
 function replaceSiteUrls(indexHtml) {
   const escapedSiteUrl = config.siteUrl.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
   return indexHtml
@@ -259,7 +324,7 @@ async function build() {
   )));
 
   const currentIndex = await readFile(indexPath, "utf8");
-  await writeFile(indexPath, replaceSiteUrls(replaceEpisodeList(currentIndex, episodes)));
+  await writeFile(indexPath, replacePodcastSeriesJsonLd(replaceSiteUrls(replaceEpisodeList(currentIndex, episodes))));
   console.log(`${episodes.length}件のエピソードページと最新3話を生成しました。`);
 }
 
