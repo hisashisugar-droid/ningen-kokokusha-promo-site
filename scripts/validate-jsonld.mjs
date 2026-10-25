@@ -64,6 +64,11 @@ const canonicalUrls = new Set();
 let episodePageCount = 0;
 let listingPageCount = 0;
 
+function attributeValue(tag, name) {
+  const escapedName = name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  return tag.match(new RegExp(`\\b${escapedName}=["']([^"']+)["']`, "i"))?.[1] ?? "";
+}
+
 for (const htmlPath of htmlFiles) {
   const relativePath = path.relative(rootDirectory, htmlPath);
   const html = await readFile(htmlPath, "utf8");
@@ -152,6 +157,35 @@ for (const htmlPath of htmlFiles) {
         errors.push(`${relativePath}: 異なる曜日シリーズの関連回があります（${relatedSlug}）。`);
       }
     }
+  }
+}
+
+const indexHtml = await readFile(path.join(rootDirectory, "index.html"), "utf8");
+const heroPicture = [...indexHtml.matchAll(/<picture\b[^>]*>[\s\S]*?<\/picture>/gi)]
+  .map((match) => match[0])
+  .find((picture) => /<img\b[^>]*class=["'][^"']*\bhero-scene\b[^"']*["']/i.test(picture));
+
+if (!heroPicture) {
+  errors.push("index.html: hero-sceneを含むpicture要素がありません。");
+} else {
+  const sources = [...heroPicture.matchAll(/<source\b[^>]*>/gi)].map((match) => match[0]);
+  const sourceTypes = sources.map((source) => attributeValue(source, "type"));
+  if (sourceTypes[0] !== "image/avif" || sourceTypes[1] !== "image/webp") {
+    errors.push("index.html: ヒーロー画像のsourceはimage/avif、image/webpの順で必要です。");
+  }
+
+  const imageTag = heroPicture.match(/<img\b[^>]*class=["'][^"']*\bhero-scene\b[^"']*["'][^>]*>/i)?.[0] ?? "";
+  if (attributeValue(imageTag, "src") !== "./assets/hero-recording-kirie-v4-canonical-faces.png") {
+    errors.push("index.html: ヒーロー画像のimgが元のPNGを参照していません。");
+  }
+  if (!/^\d+$/.test(attributeValue(imageTag, "width")) || !/^\d+$/.test(attributeValue(imageTag, "height"))) {
+    errors.push("index.html: ヒーロー画像のimgにwidthとheightが必要です。");
+  }
+  if (attributeValue(imageTag, "fetchpriority") !== "high") {
+    errors.push('index.html: ヒーロー画像のimgにfetchpriority="high"が必要です。');
+  }
+  if (attributeValue(imageTag, "decoding") !== "async") {
+    errors.push('index.html: ヒーロー画像のimgにdecoding="async"が必要です。');
   }
 }
 

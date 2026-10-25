@@ -19,6 +19,7 @@ LINEスタンプの切り絵世界を軸に再設計した、Vercel向けの公�
 - `data/episodes-cache.json`: RSS障害時の静的生成に使う正規化済みキャッシュ
 - `scripts/build-episodes.mjs`: RSSからエピソード、50件単位の一覧、sitemap、robots、トップの最新3話を静的生成
 - `scripts/run-function.mjs`: `api/episodes.js` をHTTP経由で確認するローカル関数ランナー
+- `scripts/verify-deploy.mjs`: デプロイ後の全ルート、メタデータ、API、画像を検証
 - `episodes/`: ビルド時だけ生成されるエピソードページと一覧（Git管理外）
 - `sitemap.xml` / `robots.txt`: ビルド時に最新内容へ更新されるクロール入口
 - `vercel.json`: Vercel用の静的サイト設定とビルドコマンド
@@ -42,4 +43,18 @@ curl http://127.0.0.1:4175/api/episodes
 
 **計測開始の前提:** Vercelダッシュボードの対象プロジェクトで「Analytics」を有効化し、その後に再デプロイしてください。スクリプトを配置しただけでは計測は始まりません。
 
-GitHubにpush後、VercelでリポジトリをImportしてください。Framework Presetは `Other`、Build Commandは `vercel.json` の `node scripts/build-episodes.mjs`、Output Directoryは空欄でデプロイできます。独自ドメインへ変更するときは `site.config.json` の `siteUrl` だけを変更してください。
+Framework Presetは `Other`、Build Commandは `vercel.json` の `node scripts/build-episodes.mjs`、Output Directoryは空欄です。独自ドメインへ変更するときは `site.config.json` の `siteUrl` だけを変更してください。
+
+デプロイは次の順で進めます。
+
+1. Preview用ブランチへpushし、VercelのPreview Deploymentを作成する。
+2. Preview URLに対してデプロイ検証を実行する。
+3. 全項目が成功してからmainへマージし、Production Deploymentを作成する。
+4. Production URLでも同じ検証を実行する。
+
+```bash
+node scripts/verify-deploy.mjs https://preview-example.vercel.app
+node scripts/verify-deploy.mjs https://ningen-kokokusha-promo-site.vercel.app
+```
+
+検証スクリプトは最大5リクエストを並行実行し、全エピソード、sitemap記載URL、API、リダイレクト、OGP、canonical、ヒーローAVIFを確認します。1項目でも失敗すると終了コード1になります。

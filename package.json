@@ -3,7 +3,7 @@
   "private": true,
   "scripts": {
     "build": "node scripts/build-episodes.mjs",
-    "check": "node scripts/build-episodes.mjs && node --check app.js && node --check api/episodes.js && node --check scripts/build-episodes.mjs && node --check scripts/validate-jsonld.mjs && node scripts/validate-jsonld.mjs",
+    "check": "node scripts/build-episodes.mjs && node --check app.js && node --check api/episodes.js && node --check scripts/build-episodes.mjs && node --check scripts/validate-jsonld.mjs && node --check scripts/verify-deploy.mjs && node scripts/validate-jsonld.mjs",
     "dev:function": "node scripts/run-function.mjs"
   }
 }

@@ -10,6 +10,7 @@ const sitemapPath = path.join(rootDirectory, "sitemap.xml");
 const robotsPath = path.join(rootDirectory, "robots.txt");
 const config = JSON.parse(await readFile(path.join(rootDirectory, "site.config.json"), "utf8"));
 const pageSize = 50;
+const maximumCacheAgeMilliseconds = 7 * 24 * 60 * 60 * 1000;
 const siteDescription = "人文知でマーケティングを学ぶPodcast。人間の可笑しみから、使えるインサイトを掘り起こします。";
 const episodeListStart = "<!-- EPISODE_LIST_START -->";
 const episodeListEnd = "<!-- EPISODE_LIST_END -->";
@@ -449,7 +450,7 @@ async function loadEpisodes() {
     if (!episodes.length) throw new Error("RSSにエピソードがありません。");
 
     await mkdir(path.dirname(cachePath), { recursive: true });
-    await writeFile(cachePath, `${JSON.stringify({ episodes }, null, 2)}\n`);
+    await writeFile(cachePath, `${JSON.stringify({ fetchedAt: new Date().toISOString(), episodes }, null, 2)}\n`);
     return episodes;
   } catch (rssError) {
     try {
@@ -457,10 +458,25 @@ async function loadEpisodes() {
       const episodes = Array.isArray(cached.episodes) ? cached.episodes : [];
       if (!episodes.length) throw new Error("キャッシュにエピソードがありません。");
 
-      console.warn(`RSS取得に失敗したためキャッシュから生成します: ${rssError.message}`);
+      const fetchedAt = new Date(cached.fetchedAt ?? "");
+      const cacheAgeMilliseconds = Number.isNaN(fetchedAt.getTime())
+        ? null
+        : Math.max(0, Date.now() - fetchedAt.getTime());
+      const cacheAge = cacheAgeMilliseconds === null
+        ? "unknown"
+        : `${Math.floor(cacheAgeMilliseconds / (24 * 60 * 60 * 1000))}d`;
+
+      console.warn(`WARN: RSS取得に失敗。cache age ${cacheAge} のキャッシュから${episodes.length}件を生成`);
+
+      if (cacheAgeMilliseconds !== null && cacheAgeMilliseconds > maximumCacheAgeMilliseconds) {
+        console.error(`ERROR: キャッシュが${Math.ceil(cacheAgeMilliseconds / (24 * 60 * 60 * 1000))}日経過しています（上限7日）`);
+        process.exitCode = 1;
+        return [];
+      }
+
       return episodes.sort((first, second) => new Date(second.pubDate) - new Date(first.pubDate));
     } catch (cacheError) {
-      console.warn(`RSSとキャッシュを読み込めないため既存の生成物を保持します: ${rssError.message} / ${cacheError.message}`);
+      console.warn(`WARN: RSS取得に失敗。利用可能なキャッシュなし（${rssError.message} / ${cacheError.message}）`);
       return [];
     }
   }
