@@ -67,3 +67,9 @@ node scripts/verify-deploy.mjs https://preview-example.vercel.app
 ```
 
 シークレットはリポジトリへコミットしないでください。
+
+本番デプロイと全数検証が成功した後、sitemapの全URLをIndexNowへ通知できます。
+
+```bash
+npm run indexnow
+```
