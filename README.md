@@ -16,22 +16,30 @@ LINEスタンプの切り絵世界を軸に再設計した、Vercel向けの公�
 - `assets/01.png`〜`08.png`, `main.png`: 元の切り絵キャラクター素材
 - `api/episodes.js`: RSSから最新3話を取得し、各SpotifyエピソードへリンクするVercel Function
 - `site.config.json`: サイトURL、RSS、Spotify番組URLの共通設定
-- `scripts/build-episodes.mjs`: RSSからエピソードページとトップの最新3話を静的生成
-- `episodes/episode-<回数>.html`: 検索・共有から直接開けるエピソードページ
+- `data/episodes-cache.json`: RSS障害時の静的生成に使う正規化済みキャッシュ
+- `scripts/build-episodes.mjs`: RSSからエピソード、50件単位の一覧、sitemap、robots、トップの最新3話を静的生成
+- `scripts/run-function.mjs`: `api/episodes.js` をHTTP経由で確認するローカル関数ランナー
+- `episodes/`: ビルド時だけ生成されるエピソードページと一覧（Git管理外）
+- `sitemap.xml` / `robots.txt`: ビルド時に最新内容へ更新されるクロール入口
 - `vercel.json`: Vercel用の静的サイト設定とビルドコマンド
 
 ## ローカル確認
 
-先にエピソードページを生成し、静的サーバーで確認できます。最新話APIはVercel上で動作します。
+先にエピソードページを生成し、静的サーバーで確認できます。最新話APIはVercel上で動作します。Vercelの正規URLは拡張子なしですが、標準の静的サーバーで個別ページを直接確認するときは `episodes/episode-278.html` のように `.html` を付けてください。
 
 ```bash
-npm run build
-python3 -m http.server 4173
+npm run build && python3 -m http.server 4173
+```
+
+Vercel Functionは別ターミナルで起動し、実際のHTTPレスポンスを確認できます。
+
+```bash
+npm run dev:function
+curl http://127.0.0.1:4175/api/episodes
 ```
 
 ## Vercel
 
-GitHubにpush後、VercelでリポジトリをImportしてください。
-Framework Presetは `Other`、Build Commandは `vercel.json` の `node scripts/build-episodes.mjs`、Output Directoryは空欄でデプロイできます。独自ドメインへ変更するときは `site.config.json` の `siteUrl` だけを変更してください。
+**計測開始の前提:** Vercelダッシュボードの対象プロジェクトで「Analytics」を有効化し、その後に再デプロイしてください。スクリプトを配置しただけでは計測は始まりません。
 
-デプロイ後はVercelダッシュボードの対象プロジェクトで「Analytics」を開き、Web Analyticsを有効化して再デプロイしてください。
+GitHubにpush後、VercelでリポジトリをImportしてください。Framework Presetは `Other`、Build Commandは `vercel.json` の `node scripts/build-episodes.mjs`、Output Directoryは空欄でデプロイできます。独自ドメインへ変更するときは `site.config.json` の `siteUrl` だけを変更してください。

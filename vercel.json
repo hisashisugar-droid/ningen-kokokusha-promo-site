@@ -1,5 +1,32 @@
 {
   "buildCommand": "node scripts/build-episodes.mjs",
   "cleanUrls": true,
-  "trailingSlash": false
+  "trailingSlash": false,
+  "redirects": [
+    {
+      "source": "/episodes/index.html",
+      "destination": "/episodes",
+      "permanent": true
+    },
+    {
+      "source": "/episodes/index",
+      "destination": "/episodes",
+      "permanent": true
+    },
+    {
+      "source": "/episodes/page/:page/index.html",
+      "destination": "/episodes/page/:page",
+      "permanent": true
+    },
+    {
+      "source": "/episodes/page/:page/index",
+      "destination": "/episodes/page/:page",
+      "permanent": true
+    },
+    {
+      "source": "/episodes/:slug.html",
+      "destination": "/episodes/:slug",
+      "permanent": true
+    }
+  ]
 }

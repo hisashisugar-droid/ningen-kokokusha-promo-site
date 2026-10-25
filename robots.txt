@@ -1,0 +1,1 @@
+Sitemap: https://ningen-kokokusha-promo-site.vercel.app/sitemap.xml
