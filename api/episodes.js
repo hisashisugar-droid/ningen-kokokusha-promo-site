@@ -1,4 +1,4 @@
-const RSS_URL = "https://anchor.fm/s/9bb1c5d8/podcast/rss";
+const { rssUrl: RSS_URL } = require("../site.config.json");
 
 function decodeEntities(value = "") {
   const entities = {

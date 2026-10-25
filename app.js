@@ -118,13 +118,15 @@ function renderEpisodes(episodes) {
       const meta = [date, duration].filter(Boolean).join(" / ");
       const description = escapeHtml(truncateText(episode.description || "番組ページで詳細をご確認ください。"));
       const link = episode.link || "https://open.spotify.com/show/0hQ9393s1c4rJ1iu0iF4d3";
+      const episodeNumber = title.match(/#\s*(\d+)/)?.[1];
+      const detailLink = episodeNumber ? `/episodes/episode-${episodeNumber}` : link;
 
       return `
         <article class="episode-card">
           <p class="episode-meta">${escapeHtml(meta)}</p>
           <h4>${title}</h4>
           <p>${description}</p>
-          <a href="${escapeHtml(link)}" target="_blank" rel="noopener">エピソードを開く</a>
+          <a href="${escapeHtml(detailLink)}"${episodeNumber ? "" : ' target="_blank" rel="noopener"'}>エピソードを開く</a>
         </article>
       `;
     })
@@ -142,9 +144,15 @@ async function loadEpisodes() {
     }
 
     const data = await response.json();
-    renderEpisodes(Array.isArray(data.episodes) ? data.episodes : []);
+    const episodes = Array.isArray(data.episodes) ? data.episodes : [];
+
+    if (episodes.length) {
+      renderEpisodes(episodes);
+    }
   } catch (error) {
-    renderEpisodes([]);
+    if (!episodeList.querySelector(".episode-card")) {
+      renderEpisodes([]);
+    }
   }
 }
 

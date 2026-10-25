@@ -1,4 +1,6 @@
 {
   "siteUrl": "https://ningen-kokokusha-promo-site.vercel.app",
-  "siteName": "ニンゲン広告社"
+  "siteName": "ニンゲン広告社",
+  "rssUrl": "https://anchor.fm/s/9bb1c5d8/podcast/rss",
+  "spotifyShowUrl": "https://open.spotify.com/show/0hQ9393s1c4rJ1iu0iF4d3?si=2be7f99b73c1443c"
 }

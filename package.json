@@ -1,0 +1,7 @@
+{
+  "name": "ningen-kokokusha-promo-site",
+  "private": true,
+  "scripts": {
+    "build": "node scripts/build-episodes.mjs"
+  }
+}
