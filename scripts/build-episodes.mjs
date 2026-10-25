@@ -13,6 +13,7 @@ const config = JSON.parse(await readFile(path.join(rootDirectory, "site.config.j
 const pageSize = 50;
 const transcriptConcurrency = 6;
 const transcriptMaximumCharacters = 8_000;
+const refreshTranscripts = process.env.REFRESH_TRANSCRIPTS === "1";
 const maximumCacheAgeMilliseconds = 7 * 24 * 60 * 60 * 1000;
 const siteDescription = "人文知でマーケティングを学ぶPodcast。人間の可笑しみから、使えるインサイトを掘り起こします。";
 const episodeListStart = "<!-- EPISODE_LIST_START -->";
@@ -151,12 +152,25 @@ function parseEpisodes(xml) {
   }).sort((first, second) => new Date(second.pubDate) - new Date(first.pubDate));
 }
 
+function normalizeTranscriptSpacing(value) {
+  return value
+    .replace(/[ \t\u3000]+/g, " ")
+    .replace(/(?<=[ぁ-んァ-ヶー一-龠々、。！？「」『』（）・…〜：；]) (?=[ぁ-んァ-ヶー一-龠々、。！？「」『』（）・…〜：；])/g, "")
+    .replace(/[ \t\u3000]*([、。！？])[ \t\u3000]*/g, "$1")
+    .trim();
+}
+
 function normalizeTranscriptCue(value) {
-  return decodeEntities(value)
+  return normalizeTranscriptSpacing(decodeEntities(value)
     .replace(/<[^>]+>/g, "")
     .replace(/\s+/g, " ")
-    .replace(/(?<=[ぁ-んァ-ヶー一-龠々])\s+(?=[ぁ-んァ-ヶー一-龠々])/g, "")
-    .trim();
+    .trim());
+}
+
+function transcriptSeparator(previous, current) {
+  if (!previous || !current) return "";
+  const boundary = normalizeTranscriptSpacing(`${previous.at(-1)} ${current[0]}`);
+  return boundary.includes(" ") ? " " : "";
 }
 
 function overlappingPrefixLength(previous, current) {
@@ -183,17 +197,9 @@ function formatTranscript(srt) {
   for (const cue of cueTexts) {
     const overlap = overlappingPrefixLength(text, cue);
     const addition = cue.slice(overlap);
-    const needsSpace = text
-      && addition
-      && !/[ぁ-んァ-ヶー一-龠々]$/.test(text)
-      && !/^[ぁ-んァ-ヶー一-龠々、。！？]/.test(addition);
-    text += `${needsSpace ? " " : ""}${addition}`;
+    text += `${transcriptSeparator(text, addition)}${addition}`;
   }
-  text = text
-    .replace(/(?<=[ぁ-んァ-ヶー一-龠々])\s+(?=[ぁ-んァ-ヶー一-龠々])/g, "")
-    .replace(/\s+([、。！？])/g, "$1")
-    .replace(/\s+/g, " ")
-    .trim();
+  text = normalizeTranscriptSpacing(text);
 
   let truncated = false;
   if ([...text].length > transcriptMaximumCharacters) {
@@ -267,6 +273,10 @@ async function loadTranscripts(episodes) {
 
   await Promise.all(candidates.map(async (episode) => {
     const transcriptPath = path.join(transcriptsDirectory, `${episode.guid}.json`);
+    if (refreshTranscripts) {
+      missing.push({ episode, transcriptPath });
+      return;
+    }
     try {
       const cached = JSON.parse(await readFile(transcriptPath, "utf8"));
       if (cached.guid !== episode.guid || !Array.isArray(cached.paragraphs) || !cached.paragraphs.length) {

@@ -85,6 +85,10 @@ const canonicalUrls = new Set();
 let episodePageCount = 0;
 let listingPageCount = 0;
 let transcriptPageCount = 0;
+let punctuationAfterSpaceCount = 0;
+let punctuationBeforeSpaceCount = 0;
+let repeatedSpaceCount = 0;
+let japaneseIntercharacterSpaceCount = 0;
 const episodeTextLengths = [];
 let maximumEpisodeSize = { bytes: 0, relativePath: "" };
 
@@ -93,7 +97,7 @@ function attributeValue(tag, name) {
   return tag.match(new RegExp(`\\b${escapedName}=["']([^"']+)["']`, "i"))?.[1] ?? "";
 }
 
-function visibleText(html) {
+function decodedText(html) {
   const namedEntities = { amp: "&", apos: "'", gt: ">", lt: "<", nbsp: " ", quot: '"' };
   return html
     .replace(/<script\b[\s\S]*?<\/script>/gi, " ")
@@ -101,7 +105,11 @@ function visibleText(html) {
     .replace(/<[^>]+>/g, " ")
     .replace(/&#(\d+);/g, (_, code) => String.fromCodePoint(Number(code)))
     .replace(/&#x([a-fA-F0-9]+);/g, (_, code) => String.fromCodePoint(parseInt(code, 16)))
-    .replace(/&([a-z]+);/gi, (match, entity) => namedEntities[entity.toLowerCase()] ?? match)
+    .replace(/&([a-z]+);/gi, (match, entity) => namedEntities[entity.toLowerCase()] ?? match);
+}
+
+function visibleText(html) {
+  return decodedText(html)
     .replace(/\s+/g, " ")
     .trim();
 }
@@ -217,9 +225,22 @@ for (const htmlPath of htmlFiles) {
   for (const transcriptBlock of transcriptBlocks) {
     transcriptPageCount += 1;
     const transcriptBody = transcriptBlock[1].match(/<div\s+class=["'][^"']*\btranscript-body\b[^"']*["'][^>]*>([\s\S]*?)<\/div>/i)?.[1] ?? "";
-    const transcriptText = visibleText(transcriptBody);
+    const paragraphTexts = [...transcriptBody.matchAll(/<p\b[^>]*>([\s\S]*?)<\/p>/gi)]
+      .map((match) => decodedText(match[1]).trim());
+    const transcriptText = paragraphTexts.join("\n");
     if (!transcriptText) errors.push(`${relativePath}: 文字起こし本文が空です。`);
-    if (/[ぁ-んァ-ヶー]\s+[ぁ-んァ-ヶー]/.test(transcriptText)) {
+    const punctuationAfterSpaces = transcriptText.match(/[、。！？][ \u3000]/g) ?? [];
+    const punctuationBeforeSpaces = transcriptText.match(/[ \u3000][、。！？]/g) ?? [];
+    const repeatedSpaces = transcriptText.match(/[ \u3000]{2,}/g) ?? [];
+    const japaneseIntercharacterSpaces = transcriptText.match(/[ぁ-んァ-ヶー] [ぁ-んァ-ヶー]/g) ?? [];
+    punctuationAfterSpaceCount += punctuationAfterSpaces.length;
+    punctuationBeforeSpaceCount += punctuationBeforeSpaces.length;
+    repeatedSpaceCount += repeatedSpaces.length;
+    japaneseIntercharacterSpaceCount += japaneseIntercharacterSpaces.length;
+    if (punctuationAfterSpaces.length) errors.push(`${relativePath}: 句読点直後に空白があります。`);
+    if (punctuationBeforeSpaces.length) errors.push(`${relativePath}: 句読点直前に空白があります。`);
+    if (repeatedSpaces.length) errors.push(`${relativePath}: 連続空白があります。`);
+    if (japaneseIntercharacterSpaces.length) {
       errors.push(`${relativePath}: 文字起こしに日本語の文字間スペースが残っています。`);
     }
   }
@@ -317,7 +338,8 @@ if (errors.length) {
 } else {
   console.log(`${htmlFiles.length}件のHTMLでJSON-LDとcanonicalを検証しました。`);
   console.log(`sitemap URL件数: ${sitemapUrls.length}（エピソード${episodePageCount} + 一覧${listingPageCount} + トップ1）。`);
-  console.log(`文字起こし: ${transcriptPageCount}ページ / キャッシュ${transcriptsByGuid.size}件（空本文0件・文字間スペース0件）。`);
+  console.log(`文字起こし: ${transcriptPageCount}ページ / キャッシュ${transcriptsByGuid.size}件（空本文0件）。`);
+  console.log(`文字起こし空白: 句読点後${punctuationAfterSpaceCount}件 / 句読点前${punctuationBeforeSpaceCount}件 / 連続空白${repeatedSpaceCount}件 / 日本語文字間${japaneseIntercharacterSpaceCount}件。`);
   console.log(`エピソード本文文字数中央値: ${medianEpisodeTextLength}字。`);
   console.log(`最大エピソードHTML: ${maximumEpisodeSize.bytes} bytes（${maximumEpisodeSize.relativePath}）。`);
 }
