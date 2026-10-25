@@ -149,7 +149,11 @@ const server = createServer(async (request, response) => {
     }
 
     if (vercelConfig.cleanUrls === true && pathname.endsWith(".html")) {
-      sendRedirect(response, pathname.slice(0, -5) || "/");
+      const cleanPath = pathname.slice(0, -5) || "/";
+      const chainedDestination = redirects
+        .map((redirect) => redirect.match(cleanPath))
+        .find(Boolean);
+      sendRedirect(response, chainedDestination || cleanPath);
       return;
     }
 

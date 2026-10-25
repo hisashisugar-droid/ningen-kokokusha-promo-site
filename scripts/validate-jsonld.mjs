@@ -218,9 +218,8 @@ if (vercelConfig.cleanUrls !== true || vercelConfig.trailingSlash !== false) {
 }
 
 const requiredRedirects = [
-  ["/episodes/index.html", "/episodes"],
-  ["/episodes/page/:page/index.html", "/episodes/page/:page"],
-  ["/episodes/:slug.html", "/episodes/:slug"],
+  ["/episodes/index", "/episodes"],
+  ["/episodes/page/:page/index", "/episodes/page/:page"],
 ];
 
 for (const [source, destination] of requiredRedirects) {
@@ -228,6 +227,10 @@ for (const [source, destination] of requiredRedirects) {
   if (!redirect || redirect.destination !== destination || redirect.permanent !== true) {
     errors.push(`vercel.json: リダイレクトがありません（${source} → ${destination}）。`);
   }
+}
+
+if (vercelConfig.cleanUrls === true && vercelConfig.redirects?.some((redirect) => redirect.source.includes(".html") || redirect.destination.includes(".html"))) {
+  errors.push("vercel.json: cleanUrls=trueのredirectに.htmlを含めることはできません。");
 }
 
 if (errors.length) {
