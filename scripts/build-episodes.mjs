@@ -202,6 +202,8 @@ function episodePage(episode, previousEpisode, nextEpisode) {
     <script type="application/ld+json">
 ${jsonLdMarkup(episodeJsonLd).split("\n").map((line) => `      ${line}`).join("\n")}
     </script>
+    <script>window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };</script>
+    <script defer src="/_vercel/insights/script.js"></script>
     <link rel="icon" type="image/png" href="../assets/tab.png" />
     <link rel="stylesheet" href="../styles.css" />
   </head>
@@ -221,7 +223,7 @@ ${jsonLdMarkup(episodeJsonLd).split("\n").map((line) => `      ${line}`).join("\
             ${descriptionMarkup(episode.description)}
         </div>
         <div class="episode-actions" aria-label="エピソードの次のアクション">
-          <a class="button primary" href="${escapeHtml(episode.spotifyUrl)}" target="_blank" rel="noopener">Spotifyで聴く <span aria-hidden="true">↗</span></a>
+          <a class="button primary" href="${escapeHtml(episode.spotifyUrl)}" target="_blank" rel="noopener" data-track="Spotify click" data-track-location="episode-${escapeHtml(episode.number)}">Spotifyで聴く <span aria-hidden="true">↗</span></a>
           <a class="button request-cta" href="../index.html#request">おたよりを送る <span aria-hidden="true">→</span></a>
         </div>
         <nav class="episode-pagination" aria-label="前後のエピソード">
@@ -230,6 +232,7 @@ ${jsonLdMarkup(episodeJsonLd).split("\n").map((line) => `      ${line}`).join("\
       </article>
     </main>
     <footer class="site-footer"><img src="../assets/ningen-kokokusha-wordmark-v4-white.png" alt="ニンゲン広告社" /><div><p>人文知でマーケティングを学ぶPodcast</p><a href="../index.html">サイトトップへ戻る</a></div><p class="copyright">© Ningen Agency 2026</p></footer>
+    <script src="../app.js"></script>
   </body>
 </html>
 `;

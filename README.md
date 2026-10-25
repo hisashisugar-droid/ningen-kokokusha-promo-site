@@ -33,3 +33,5 @@ python3 -m http.server 4173
 
 GitHubにpush後、VercelでリポジトリをImportしてください。
 Framework Presetは `Other`、Build Commandは `vercel.json` の `node scripts/build-episodes.mjs`、Output Directoryは空欄でデプロイできます。独自ドメインへ変更するときは `site.config.json` の `siteUrl` だけを変更してください。
+
+デプロイ後はVercelダッシュボードの対象プロジェクトで「Analytics」を開き、Web Analyticsを有効化して再デプロイしてください。

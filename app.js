@@ -29,6 +29,12 @@ const googleFormConfig = {
 let requestSubmitted = false;
 let activeMemberButton = null;
 
+function trackAnalyticsEvent(name, data = {}) {
+  if (typeof window.va !== "function") return;
+
+  window.va("event", { name, data });
+}
+
 const memberProfiles = {
   hayami: {
     name: "ハヤミ",
@@ -120,13 +126,16 @@ function renderEpisodes(episodes) {
       const link = episode.link || "https://open.spotify.com/show/0hQ9393s1c4rJ1iu0iF4d3";
       const episodeNumber = title.match(/#\s*(\d+)/)?.[1];
       const detailLink = episodeNumber ? `/episodes/episode-${episodeNumber}` : link;
+      const trackingAttributes = episodeNumber
+        ? ""
+        : ' data-track="Spotify click" data-track-location="latest-episode-fallback"';
 
       return `
         <article class="episode-card">
           <p class="episode-meta">${escapeHtml(meta)}</p>
           <h4>${title}</h4>
           <p>${description}</p>
-          <a href="${escapeHtml(detailLink)}"${episodeNumber ? "" : ' target="_blank" rel="noopener"'}>エピソードを開く</a>
+          <a href="${escapeHtml(detailLink)}"${episodeNumber ? "" : ' target="_blank" rel="noopener"'}${trackingAttributes}>エピソードを開く</a>
         </article>
       `;
     })
@@ -169,6 +178,16 @@ navLinks.forEach((link) => {
     document.body.classList.remove("nav-open");
     navToggle?.setAttribute("aria-expanded", "false");
     navToggle?.setAttribute("aria-label", "メニューを開く");
+  });
+});
+
+document.addEventListener("click", (event) => {
+  const trackedLink = event.target.closest?.("a[data-track]");
+
+  if (!trackedLink) return;
+
+  trackAnalyticsEvent(trackedLink.dataset.track, {
+    location: trackedLink.dataset.trackLocation || window.location.pathname,
   });
 });
 
@@ -299,6 +318,9 @@ if (requestFrame) {
     requestSubmitted = false;
     requestForm.reset();
     requestNote.textContent = "送信しました。リクエストありがとうございます。";
+    trackAnalyticsEvent(requestForm.dataset.track || "Request submitted", {
+      location: "request-form",
+    });
   });
 }
 
