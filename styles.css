@@ -66,6 +66,7 @@ button { color: inherit; }
 
 .hero { position: relative; overflow: hidden; background: var(--paper); }
 .hero-visual { position: relative; max-width: 1672px; margin: 0 auto; border-bottom: 3px solid var(--ink); background: #e9b631; }
+.hero-visual picture { display: block; }
 .hero-scene { width: 100%; height: auto; }
 .hero-logo-lockup { position: absolute; top: 2.3%; left: 50%; width: min(45vw, 760px); text-align: center; transform: translateX(-50%); }
 .hero-logo { width: 100%; margin: 0 auto; object-fit: contain; filter: drop-shadow(3px 4px 0 rgba(255, 250, 240, .68)); }
