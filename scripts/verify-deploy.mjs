@@ -10,6 +10,10 @@ const expectedListingCount = 7;
 const expectedSitemapCount = 350;
 const concurrency = 5;
 const timeoutMilliseconds = 10_000;
+const bypassSecret = process.env.VERCEL_AUTOMATION_BYPASS_SECRET ?? "";
+const bypassHeaders = bypassSecret
+  ? { "x-vercel-protection-bypass": bypassSecret }
+  : {};
 
 if (!targetArgument) {
   console.error("Usage: node scripts/verify-deploy.mjs https://example.vercel.app");
@@ -84,6 +88,16 @@ function noteRoute(url, ok, detail) {
   }
 }
 
+function exitForDeploymentProtection(status) {
+  const statusText = status === 401 ? "Unauthorized" : "Forbidden";
+  console.error(`ERROR: ${status} ${statusText} — Deployment Protection が有効です。
+次のいずれかを行ってください:
+  1) 環境変数 VERCEL_AUTOMATION_BYPASS_SECRET に bypass secret を設定
+  2) Vercel ダッシュボード → Settings → Deployment Protection で
+     Preview の保護を解除`);
+  process.exit(1);
+}
+
 async function request(url, { headers = {}, redirect = "follow", retries = 0 } = {}) {
   let lastResult;
 
@@ -92,7 +106,12 @@ async function request(url, { headers = {}, redirect = "follow", retries = 0 } =
     const timer = setTimeout(() => controller.abort(), timeoutMilliseconds);
 
     try {
-      const response = await fetch(url, { headers, redirect, signal: controller.signal });
+      const response = await fetch(url, {
+        headers: { ...headers, ...bypassHeaders },
+        redirect,
+        signal: controller.signal,
+      });
+      if (response.status === 401 || response.status === 403) exitForDeploymentProtection(response.status);
       const body = Buffer.from(await response.arrayBuffer());
       lastResult = { response, body, error: null };
       if (response.status === 200 || attempt === retries) return lastResult;
@@ -248,6 +267,7 @@ noteRoute(heroUrl, heroOk, `${statusDetail(heroResult)}, ${heroContentType || "c
 addResult("ヒーローAVIF", heroOk, `${heroContentType || "content-typeなし"}, ${heroResult.body.length} bytes`);
 
 console.log(`\nDeploy verification: ${target.href}`);
+console.log(`BYPASS: ${bypassSecret ? "enabled" : "none"}`);
 console.log("| 検査 | 結果 | 詳細 |");
 console.log("|---|---:|---|");
 for (const result of results) {

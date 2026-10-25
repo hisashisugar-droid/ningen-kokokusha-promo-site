@@ -58,3 +58,12 @@ node scripts/verify-deploy.mjs https://ningen-kokokusha-promo-site.vercel.app
 ```
 
 検証スクリプトは最大5リクエストを並行実行し、全エピソード、sitemap記載URL、API、リダイレクト、OGP、canonical、ヒーローAVIFを確認します。1項目でも失敗すると終了コード1になります。
+
+PreviewでDeployment Protectionを有効にしている場合は、Vercelダッシュボードの「Settings」→「Deployment Protection」→「Protection Bypass for Automation」でシークレットを発行し、環境変数で検証スクリプトへ渡します。
+
+```bash
+export VERCEL_AUTOMATION_BYPASS_SECRET=xxxxxxxx
+node scripts/verify-deploy.mjs https://preview-example.vercel.app
+```
+
+シークレットはリポジトリへコミットしないでください。
