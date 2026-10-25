@@ -6,10 +6,13 @@ const rootDirectory = path.resolve(path.dirname(fileURLToPath(import.meta.url)),
 const indexPath = path.join(rootDirectory, "index.html");
 const episodesDirectory = path.join(rootDirectory, "episodes");
 const cachePath = path.join(rootDirectory, "data", "episodes-cache.json");
+const transcriptsDirectory = path.join(rootDirectory, "data", "transcripts");
 const sitemapPath = path.join(rootDirectory, "sitemap.xml");
 const robotsPath = path.join(rootDirectory, "robots.txt");
 const config = JSON.parse(await readFile(path.join(rootDirectory, "site.config.json"), "utf8"));
 const pageSize = 50;
+const transcriptConcurrency = 6;
+const transcriptMaximumCharacters = 8_000;
 const maximumCacheAgeMilliseconds = 7 * 24 * 60 * 60 * 1000;
 const siteDescription = "人文知でマーケティングを学ぶPodcast。人間の可笑しみから、使えるインサイトを掘り起こします。";
 const episodeListStart = "<!-- EPISODE_LIST_START -->";
@@ -35,6 +38,13 @@ function decodeEntities(value = "") {
 function readTag(block, tagName) {
   const escapedTag = tagName.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
   return block.match(new RegExp(`<${escapedTag}(?:\\s[^>]*)?>([\\s\\S]*?)<\\/${escapedTag}>`, "i"))?.[1] ?? "";
+}
+
+function readTagAttributes(block, tagName) {
+  const escapedTag = tagName.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const attributesText = block.match(new RegExp(`<${escapedTag}\\b([^>]*)\/?>`, "i"))?.[1] ?? "";
+  return Object.fromEntries([...attributesText.matchAll(/([:\w-]+)\s*=\s*["']([^"']*)["']/g)]
+    .map((match) => [match[1].toLowerCase(), decodeEntities(match[2])]));
 }
 
 function stripHtml(value = "") {
@@ -123,18 +133,174 @@ function parseEpisodes(xml) {
     const title = stripHtml(readTag(block, "title"));
     const link = stripHtml(readTag(block, "link"));
     const guid = stripHtml(readTag(block, "guid"));
+    const transcript = readTagAttributes(block, "podcast:transcript");
     const number = episodeIdentifier(title, guid, link);
 
     return {
       title,
+      guid,
       number,
       slug: `episode-${number}`,
       pubDate: stripHtml(readTag(block, "pubDate")),
       duration: stripHtml(readTag(block, "itunes:duration")),
       description: stripHtml(readTag(block, "description") || readTag(block, "itunes:summary")),
       spotifyUrl: link || config.spotifyShowUrl,
+      transcriptUrl: transcript.type === "application/x-subrip" ? transcript.url ?? "" : "",
+      transcriptType: transcript.type ?? "",
     };
   }).sort((first, second) => new Date(second.pubDate) - new Date(first.pubDate));
+}
+
+function normalizeTranscriptCue(value) {
+  return decodeEntities(value)
+    .replace(/<[^>]+>/g, "")
+    .replace(/\s+/g, " ")
+    .replace(/(?<=[ぁ-んァ-ヶー一-龠々])\s+(?=[ぁ-んァ-ヶー一-龠々])/g, "")
+    .trim();
+}
+
+function overlappingPrefixLength(previous, current) {
+  const maximum = Math.min(previous.length, current.length);
+  for (let length = maximum; length >= 8; length -= 1) {
+    if (previous.endsWith(current.slice(0, length))) return length;
+  }
+  return 0;
+}
+
+function formatTranscript(srt) {
+  const cueTexts = srt
+    .replace(/^\uFEFF/, "")
+    .replace(/\r\n?/g, "\n")
+    .split(/\n{2,}/)
+    .map((block) => block.split("\n")
+      .map((line) => line.trim())
+      .filter((line) => line && !/^\d+$/.test(line) && !line.includes("-->"))
+      .join(" "))
+    .map(normalizeTranscriptCue)
+    .filter(Boolean);
+
+  let text = "";
+  for (const cue of cueTexts) {
+    const overlap = overlappingPrefixLength(text, cue);
+    const addition = cue.slice(overlap);
+    const needsSpace = text
+      && addition
+      && !/[ぁ-んァ-ヶー一-龠々]$/.test(text)
+      && !/^[ぁ-んァ-ヶー一-龠々、。！？]/.test(addition);
+    text += `${needsSpace ? " " : ""}${addition}`;
+  }
+  text = text
+    .replace(/(?<=[ぁ-んァ-ヶー一-龠々])\s+(?=[ぁ-んァ-ヶー一-龠々])/g, "")
+    .replace(/\s+([、。！？])/g, "$1")
+    .replace(/\s+/g, " ")
+    .trim();
+
+  let truncated = false;
+  if ([...text].length > transcriptMaximumCharacters) {
+    const candidate = [...text].slice(0, transcriptMaximumCharacters - 1).join("");
+    const ending = Math.max(candidate.lastIndexOf("。"), candidate.lastIndexOf("！"), candidate.lastIndexOf("？"));
+    text = `${candidate.slice(0, ending >= 0 ? ending + 1 : candidate.length)}…`;
+    truncated = true;
+  }
+
+  const sentences = text.match(/[^。！？]+[。！？]+|[^。！？]+$/g) ?? [];
+  const paragraphs = [];
+  let paragraph = "";
+
+  for (const sentence of sentences) {
+    paragraph += sentence.trim();
+    if ([...paragraph].length >= 200) {
+      paragraphs.push(paragraph);
+      paragraph = "";
+    }
+  }
+  if (paragraph) paragraphs.push(paragraph);
+
+  if (truncated && paragraphs.length && !paragraphs.at(-1).endsWith("…")) {
+    paragraphs[paragraphs.length - 1] += "…";
+  }
+  return paragraphs;
+}
+
+async function fetchTranscript(url) {
+  let lastError;
+  for (let attempt = 0; attempt < 2; attempt += 1) {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 15_000);
+    try {
+      const response = await fetch(url, {
+        headers: { "user-agent": "ningen-kokokusha-promo-site/1.0" },
+        signal: controller.signal,
+      });
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      return await response.text();
+    } catch (error) {
+      lastError = error;
+    } finally {
+      clearTimeout(timeout);
+    }
+  }
+  throw lastError;
+}
+
+async function mapConcurrent(items, limit, worker) {
+  const output = new Array(items.length);
+  let nextIndex = 0;
+
+  async function run() {
+    while (nextIndex < items.length) {
+      const index = nextIndex;
+      nextIndex += 1;
+      output[index] = await worker(items[index], index);
+    }
+  }
+
+  await Promise.all(Array.from({ length: Math.min(limit, items.length) }, run));
+  return output;
+}
+
+async function loadTranscripts(episodes) {
+  const candidates = episodes.filter((episode) => episode.guid && episode.transcriptUrl);
+  const transcripts = new Map();
+  const missing = [];
+  await mkdir(transcriptsDirectory, { recursive: true });
+
+  await Promise.all(candidates.map(async (episode) => {
+    const transcriptPath = path.join(transcriptsDirectory, `${episode.guid}.json`);
+    try {
+      const cached = JSON.parse(await readFile(transcriptPath, "utf8"));
+      if (cached.guid !== episode.guid || !Array.isArray(cached.paragraphs) || !cached.paragraphs.length) {
+        throw new Error("キャッシュ形式が不正です。");
+      }
+      transcripts.set(episode.guid, cached);
+    } catch {
+      missing.push({ episode, transcriptPath });
+    }
+  }));
+
+  let fetchedCount = 0;
+  let failedCount = 0;
+  await mapConcurrent(missing, transcriptConcurrency, async ({ episode, transcriptPath }) => {
+    try {
+      const paragraphs = formatTranscript(await fetchTranscript(episode.transcriptUrl));
+      if (!paragraphs.length) throw new Error("整形後の本文が空です。");
+      const transcript = {
+        guid: episode.guid,
+        episodeNumber: episode.number,
+        fetchedAt: new Date().toISOString(),
+        paragraphs,
+      };
+      await writeFile(transcriptPath, `${JSON.stringify(transcript, null, 2)}\n`);
+      transcripts.set(episode.guid, transcript);
+      fetchedCount += 1;
+    } catch (error) {
+      failedCount += 1;
+      console.warn(`WARN: 文字起こし取得失敗: ${episode.title}（${error.message}）`);
+    }
+  });
+
+  console.log(`文字起こし: ${transcripts.size}件（キャッシュ${candidates.length - missing.length} / 取得${fetchedCount} / 失敗${failedCount} / 対象${candidates.length}）`);
+  return transcripts;
 }
 
 function descriptionMarkup(description) {
@@ -205,7 +371,19 @@ function relatedEpisodesMarkup(relatedEpisodes) {
         </section>`;
 }
 
-function episodePage(episode, previousEpisode, nextEpisode, relatedEpisodes) {
+function transcriptMarkup(transcript) {
+  if (!transcript?.paragraphs?.length) return "";
+  const paragraphs = transcript.paragraphs.map((paragraph) => `<p>${escapeHtml(paragraph)}</p>`).join("\n            ");
+  return `<details class="transcript">
+          <summary>文字起こし（自動生成）を読む</summary>
+          <div class="transcript-body">
+            ${paragraphs}
+          </div>
+        </details>
+        <p class="transcript-note">この文字起こしはSpotifyの自動生成によるものです。固有名詞の誤変換を含む場合があります。</p>`;
+}
+
+function episodePage(episode, previousEpisode, nextEpisode, relatedEpisodes, transcript) {
   const pageUrl = episodeUrl(episode);
   const imageUrl = `${config.siteUrl}/assets/og-cover.png`;
   const description = summary(episode.description);
@@ -277,6 +455,7 @@ ${jsonLdMarkup(episodeJsonLd).split("\n").map((line) => `      ${line}`).join("\
           ${pagination}
         </nav>
         ${relatedEpisodesMarkup(relatedEpisodes)}
+        ${transcriptMarkup(transcript)}
       </article>
     </main>
     ${siteFooter()}
@@ -485,6 +664,7 @@ async function loadEpisodes() {
 async function build() {
   const episodes = await loadEpisodes();
   if (!episodes.length) return;
+  const transcripts = await loadTranscripts(episodes);
 
   const pageCount = Math.ceil(episodes.length / pageSize);
   await rm(episodesDirectory, { recursive: true, force: true });
@@ -492,7 +672,7 @@ async function build() {
 
   await Promise.all(episodes.map((episode, index) => writeFile(
     path.join(episodesDirectory, `${episode.slug}.html`),
-    episodePage(episode, episodes[index + 1], episodes[index - 1], relatedEpisodesFor(episode, episodes)),
+    episodePage(episode, episodes[index + 1], episodes[index - 1], relatedEpisodesFor(episode, episodes), transcripts.get(episode.guid)),
   )));
 
   await writeFile(path.join(episodesDirectory, "index.html"), listingPage(episodes, 1, pageCount));

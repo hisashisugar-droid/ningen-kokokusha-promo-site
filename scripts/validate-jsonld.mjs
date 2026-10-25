@@ -4,10 +4,31 @@ import { fileURLToPath } from "node:url";
 
 const rootDirectory = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const episodesDirectory = path.join(rootDirectory, "episodes");
+const transcriptsDirectory = path.join(rootDirectory, "data", "transcripts");
 const config = JSON.parse(await readFile(path.join(rootDirectory, "site.config.json"), "utf8"));
 const cache = JSON.parse(await readFile(path.join(rootDirectory, "data", "episodes-cache.json"), "utf8"));
 const episodesBySlug = new Map(cache.episodes.map((episode) => [episode.slug, episode]));
 const errors = [];
+const transcriptsByGuid = new Map();
+
+try {
+  const transcriptFiles = (await readdir(transcriptsDirectory)).filter((name) => name.endsWith(".json"));
+  for (const fileName of transcriptFiles) {
+    const relativePath = path.join("data", "transcripts", fileName);
+    try {
+      const transcript = JSON.parse(await readFile(path.join(transcriptsDirectory, fileName), "utf8"));
+      if (!transcript.guid || !transcript.episodeNumber || !transcript.fetchedAt || !Array.isArray(transcript.paragraphs) || !transcript.paragraphs.length) {
+        errors.push(`${relativePath}: 必須フィールドまたは本文がありません。`);
+        continue;
+      }
+      transcriptsByGuid.set(transcript.guid, transcript);
+    } catch (error) {
+      errors.push(`${relativePath}: キャッシュを読み込めません（${error.message}）。`);
+    }
+  }
+} catch (error) {
+  errors.push(`data/transcripts: キャッシュディレクトリを読み込めません（${error.message}）。`);
+}
 
 async function collectHtmlFiles(directory) {
   const entries = await readdir(directory, { withFileTypes: true });
@@ -63,10 +84,32 @@ const htmlFiles = [path.join(rootDirectory, "index.html"), ...episodeFiles].sort
 const canonicalUrls = new Set();
 let episodePageCount = 0;
 let listingPageCount = 0;
+let transcriptPageCount = 0;
+const episodeTextLengths = [];
+let maximumEpisodeSize = { bytes: 0, relativePath: "" };
 
 function attributeValue(tag, name) {
   const escapedName = name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
   return tag.match(new RegExp(`\\b${escapedName}=["']([^"']+)["']`, "i"))?.[1] ?? "";
+}
+
+function visibleText(html) {
+  const namedEntities = { amp: "&", apos: "'", gt: ">", lt: "<", nbsp: " ", quot: '"' };
+  return html
+    .replace(/<script\b[\s\S]*?<\/script>/gi, " ")
+    .replace(/<style\b[\s\S]*?<\/style>/gi, " ")
+    .replace(/<[^>]+>/g, " ")
+    .replace(/&#(\d+);/g, (_, code) => String.fromCodePoint(Number(code)))
+    .replace(/&#x([a-fA-F0-9]+);/g, (_, code) => String.fromCodePoint(parseInt(code, 16)))
+    .replace(/&([a-z]+);/gi, (match, entity) => namedEntities[entity.toLowerCase()] ?? match)
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function median(values) {
+  const sorted = [...values].sort((first, second) => first - second);
+  const middle = Math.floor(sorted.length / 2);
+  return sorted.length % 2 ? sorted[middle] : Math.round((sorted[middle - 1] + sorted[middle]) / 2);
 }
 
 for (const htmlPath of htmlFiles) {
@@ -126,6 +169,9 @@ for (const htmlPath of htmlFiles) {
   }
 
   episodePageCount += 1;
+  episodeTextLengths.push([...visibleText(html)].length);
+  const htmlBytes = Buffer.byteLength(html);
+  if (htmlBytes > maximumEpisodeSize.bytes) maximumEpisodeSize = { bytes: htmlBytes, relativePath };
   if (data["@type"] !== "PodcastEpisode") errors.push(`${relativePath}: @type が PodcastEpisode ではありません。`);
   requireFields(data, ["name", "description", "datePublished", "timeRequired", "partOfSeries", "url"], relativePath);
 
@@ -158,6 +204,38 @@ for (const htmlPath of htmlFiles) {
       }
     }
   }
+
+  const transcriptBlocks = [...html.matchAll(/<details\s+class=["'][^"']*\btranscript\b[^"']*["'][^>]*>([\s\S]*?)<\/details>/gi)];
+  const expectedTranscript = currentEpisode?.guid ? transcriptsByGuid.get(currentEpisode.guid) : undefined;
+
+  if (expectedTranscript && transcriptBlocks.length !== 1) {
+    errors.push(`${relativePath}: キャッシュ済み文字起こしは1ブロック必要です（検出: ${transcriptBlocks.length}）。`);
+  } else if (!expectedTranscript && transcriptBlocks.length !== 0) {
+    errors.push(`${relativePath}: キャッシュのない回に文字起こしブロックがあります。`);
+  }
+
+  for (const transcriptBlock of transcriptBlocks) {
+    transcriptPageCount += 1;
+    const transcriptBody = transcriptBlock[1].match(/<div\s+class=["'][^"']*\btranscript-body\b[^"']*["'][^>]*>([\s\S]*?)<\/div>/i)?.[1] ?? "";
+    const transcriptText = visibleText(transcriptBody);
+    if (!transcriptText) errors.push(`${relativePath}: 文字起こし本文が空です。`);
+    if (/[ぁ-んァ-ヶー]\s+[ぁ-んァ-ヶー]/.test(transcriptText)) {
+      errors.push(`${relativePath}: 文字起こしに日本語の文字間スペースが残っています。`);
+    }
+  }
+}
+
+if (transcriptPageCount !== transcriptsByGuid.size) {
+  errors.push(`文字起こしブロック数がキャッシュ件数と一致しません（${transcriptPageCount} / ${transcriptsByGuid.size}）。`);
+}
+
+const medianEpisodeTextLength = median(episodeTextLengths);
+if (medianEpisodeTextLength < 3_000) {
+  errors.push(`エピソードページ本文文字数の中央値が3,000字未満です（${medianEpisodeTextLength}字）。`);
+}
+
+if (maximumEpisodeSize.bytes > 60 * 1024) {
+  errors.push(`${maximumEpisodeSize.relativePath}: HTMLサイズが60KBを超えています（${maximumEpisodeSize.bytes} bytes）。`);
 }
 
 const indexHtml = await readFile(path.join(rootDirectory, "index.html"), "utf8");
@@ -239,4 +317,7 @@ if (errors.length) {
 } else {
   console.log(`${htmlFiles.length}件のHTMLでJSON-LDとcanonicalを検証しました。`);
   console.log(`sitemap URL件数: ${sitemapUrls.length}（エピソード${episodePageCount} + 一覧${listingPageCount} + トップ1）。`);
+  console.log(`文字起こし: ${transcriptPageCount}ページ / キャッシュ${transcriptsByGuid.size}件（空本文0件・文字間スペース0件）。`);
+  console.log(`エピソード本文文字数中央値: ${medianEpisodeTextLength}字。`);
+  console.log(`最大エピソードHTML: ${maximumEpisodeSize.bytes} bytes（${maximumEpisodeSize.relativePath}）。`);
 }

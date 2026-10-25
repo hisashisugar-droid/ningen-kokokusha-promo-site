@@ -207,6 +207,13 @@ button { color: inherit; }
 .related-episode-card { padding: 18px; border: 2px solid var(--ink); background: #eddda7; box-shadow: 4px 4px 0 var(--ink); }
 .related-episode-card p { margin: 0 0 8px; color: var(--red-dark); font-size: 11px; font-weight: 900; }
 .related-episode-card h3 { margin: 0; font-size: 15px; line-height: 1.55; }
+.transcript { max-width: 100%; margin-top: 54px; padding-top: 34px; color: var(--ink); border-top: 2px dashed rgba(48,42,34,.28); }
+.transcript summary { width: fit-content; font-size: 14px; font-weight: 800; line-height: 1.65; cursor: pointer; }
+.transcript summary:hover { text-decoration: underline; text-underline-offset: 4px; }
+.transcript-body { max-width: 100%; margin-top: 28px; color: var(--muted); font-size: 16px; font-weight: 700; line-height: 2; overflow-wrap: anywhere; }
+.transcript-body p { margin: 0 0 1.45em; }
+.transcript-body p:last-child { margin-bottom: 0; }
+.transcript-note { max-width: 100%; margin: 12px 0 0; color: var(--muted); font-size: 12px; font-weight: 700; line-height: 1.7; overflow-wrap: anywhere; }
 
 .episode-index-main { width: min(var(--max), calc(100% - 40px)); margin: 0 auto; padding: 92px 0 120px; }
 .episode-index-heading { margin-bottom: 42px; }
@@ -302,6 +309,7 @@ button { color: inherit; }
   .episode-pagination { grid-template-columns: 1fr; }
   .episode-pagination a:last-child { text-align: left; }
   .related-episode-list, .episode-index-list { grid-template-columns: 1fr; }
+  .transcript-body { font-size: 15px; }
   .episode-index-main { padding: 62px 0 90px; }
   .site-header { min-height: 66px; padding: 7px 17px; }
   .brand img { width: 142px; height: 48px; }
