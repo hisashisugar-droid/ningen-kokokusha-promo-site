@@ -220,7 +220,10 @@ ${jsonLdMarkup(episodeJsonLd).split("\n").map((line) => `      ${line}`).join("\
         <div class="episode-description">
             ${descriptionMarkup(episode.description)}
         </div>
-        <a class="button primary episode-primary-action" href="${escapeHtml(episode.spotifyUrl)}" target="_blank" rel="noopener">Spotifyで聴く <span aria-hidden="true">↗</span></a>
+        <div class="episode-actions" aria-label="エピソードの次のアクション">
+          <a class="button primary" href="${escapeHtml(episode.spotifyUrl)}" target="_blank" rel="noopener">Spotifyで聴く <span aria-hidden="true">↗</span></a>
+          <a class="button request-cta" href="../index.html#request">おたよりを送る <span aria-hidden="true">→</span></a>
+        </div>
         <nav class="episode-pagination" aria-label="前後のエピソード">
           ${pagination}
         </nav>

@@ -191,7 +191,8 @@ button { color: inherit; }
 .episode-description { margin-top: 42px; padding-top: 32px; color: var(--muted); border-top: 2px dashed rgba(48,42,34,.28); font-size: 16px; font-weight: 700; line-height: 2; }
 .episode-description p { margin: 0 0 1.45em; }
 .episode-description p:last-child { margin-bottom: 0; }
-.episode-primary-action { margin-top: 42px; }
+.episode-actions { display: flex; flex-wrap: wrap; gap: 16px; margin-top: 42px; }
+.episode-actions .button { flex: 1 1 220px; }
 .episode-pagination { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; margin-top: 38px; }
 .episode-pagination a { display: grid; min-height: 100px; align-content: center; padding: 18px; border: 2px solid var(--ink); background: #eddda7; box-shadow: 5px 5px 0 var(--ink); }
 .episode-pagination a:last-child { text-align: right; }
@@ -273,6 +274,7 @@ button { color: inherit; }
 }
 
 @media (max-width: 720px) {
+  .hero-actions .button { min-height: 58px; flex-basis: 100%; }
   .episode-main { padding: 62px 0 90px; }
   .episode-pagination { grid-template-columns: 1fr; }
   .episode-pagination a:last-child { text-align: left; }
